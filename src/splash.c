@@ -1,5 +1,5 @@
-#include "splash.h"
-#include "render.h"
+#include "include/splash.h"
+#include "include/render.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

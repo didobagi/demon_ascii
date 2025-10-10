@@ -1,5 +1,5 @@
-#include "shapes.h"
-#include "types.h"
+#include "include/shapes.h"
+#include "include/types.h"
 
 Point ghost_template[] = {
     {0, 3},
