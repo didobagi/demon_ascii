@@ -10,12 +10,12 @@
 #include <termios.h>
 #include <fcntl.h>
 
-#include "include/types.h"
-#include "include/shapes.h"
-#include "include/render.h"
-#include "include/game.h"
-#include "include/input.h"
-#include "include/splash.h"
+#include "../include/types.h"
+#include "../include/shapes.h"
+#include "../include/render.h"
+#include "../include/game.h"
+#include "../include/input.h"
+#include "../include/splash.h"
 
 void init (int *width, int *height) {
     usleep(50000);
