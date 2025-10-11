@@ -14,6 +14,12 @@ Point ghost_template[] = {
     {0, 3}
 };
 
+Point demon_snake_template[] = {
+    {0, -2},  // small head (single point)
+    {-4, -1}, {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1}, {3, -1},
+    {-5, 0}, {-4, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0},
+};
+
 Point demon_template[] = {
     {-1, -4}, {1, -4},
     {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
@@ -25,6 +31,7 @@ Point demon_template[] = {
     {-4, 3}, {-2, 3}, {0, 3}, {2, 3},
     {-3, 4}, {-1, 4}, {1, 4}, {3, 4}
 };
+
 Point tower_template[] = {
     {-2, -3}, {-1, -3}, {0, -3}, {1, -3}, {2, -3},
     {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2},
@@ -54,4 +61,5 @@ Point tower_template[] = {
 
 const int ghost_point_count = sizeof(ghost_template)/sizeof(Point);
 const int demon_point_count = sizeof(demon_template)/sizeof(Point);
+const int demon_snake_point_count = sizeof(demon_snake_template)/sizeof(Point);
 const int tower_point_count = sizeof(tower_template)/sizeof(Point);

@@ -1,17 +1,24 @@
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -Iinclude
 LDFLAGS = -lm
 SRCDIR = src
-SOURCES = $(SRCDIR)/main.c $(SRCDIR)/shapes.c $(SRCDIR)/game.c \
-		  $(SRCDIR)/render.c $(SRCDIR)/input.c $(SRCDIR)/splash.c
-OBJECTS = $(SOURCES:.c=.o)
-	TARGET = main
+BUILDDIR = build
+SOURCES = $(wildcard $(SRCDIR)/*.c)
+OBJECTS = $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(SOURCES))
+TARGET = main
+
+all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
 
-%.o: %.c
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c | $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
+
 clean:
-	rm -f $(SRCDIR)/*.o $(TARGET)
+	rm -rf $(BUILDDIR) $(TARGET)
+
+.PHONY: all clean

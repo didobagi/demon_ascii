@@ -1,5 +1,3 @@
-#include <asm-generic/ioctls.h>
-#include <bits/posix2_lim.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -46,8 +44,8 @@ void initialise_game (GameState *game) {
     game->object_count = 0;
 
     create_object(game->objects, &game->object_count,
-            demon_template, demon_point_count,
-            12.0, 12.0, 0.4, 0.2,
+            demon_snake_template, demon_snake_point_count,
+            12.0, 12.0, 1.0, 0.0,
             6.0, TEXTURE_GRADIENT);
 
     game->frame = 0;
@@ -111,7 +109,6 @@ void render_game(GameState *game) {
 
 static void show_splash_scr (int term_w, int term_h) {
     printf("\033[2J");
-    printf("\033[?25l");
     fflush(stdout);
 
     const char *message = "PRESS ANY KEY TO START";
