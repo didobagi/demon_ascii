@@ -47,6 +47,9 @@ void initiate_morph(GameObject *obj) {
     bool morphing_to_snake;
 
     if(obj->in_snake_form) {
+        if (obj->total_collected_count < obj->snake_form_point_count) {
+            return;
+        }
         source_template = obj->snake_form_template;
         target_template = obj->demon_form_template;
         point_count = obj->demon_form_point_count;

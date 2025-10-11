@@ -124,6 +124,13 @@ void render_game(GameState *game) {
                     game->objects[i].transform.y,false, game->frame);
         }
     }
+    if (game->objects[0].in_snake_form) {
+        printf("\033[1;1H");
+        printf("Points: %d, %d",
+                game->objects[0].total_collected_count,
+                game->objects[0].snake_form_point_count);
+        fflush(stdout);
+    }
 }
 
 static void show_splash_scr (int term_w, int term_h) {
@@ -173,6 +180,9 @@ int main () {
         //update_sectors(&game);
         handle_input(&game);
         update_morph(&game.objects[0],&game, game.frame);
+        if (game.objects[0].in_snake_form) {
+            check_collectible_collision(&game.objects[0], &game);
+        }
         bounce(&game.objects[0], game.max_x, game.max_y); 
         render_game(&game);
         //update_transform(&objects[0], max_x, max_y);

@@ -12,6 +12,7 @@ void update_transform(GameObject *obj, int max_x, int max_y);
 void update_visual(GameObject *obj);
 bool check_boundaries(GameObject *obj, int max_x, int max_y);
 bool check_obj_collision(GameObject *obj_a, GameObject *obj_b);
+void check_collectible_collision (GameObject *player, GameState *game);
 void commit_transf(GameObject *obj);
 ShapeBounds calculate_shape_bounds (Point *points, int count);
 ShapeBounds calculate_shape_bounds_selective (Point *points, int count,

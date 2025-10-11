@@ -113,6 +113,7 @@ ShapeBounds calculate_shape_bounds_selective (Point *points, int count,
 
     return bounds;
 }
+
 int create_object(GameObject objects[], int* count,
         Point *shape_template, int point_count,
         float x, float y, float dx, float dy,
@@ -181,5 +182,43 @@ void bounce (GameObject *obj, int screen_w, int screen_h) {
     }
     if (bottom_edge >= screen_h) {
         obj->transform.y -= (bottom_edge - screen_h + 1);
+    }
+}
+
+void collect_point (GameObject *player, CollectiblePoint *cp, GameState *game) {
+    cp->active = false;
+
+    int shape_index = cp->shape_point_index;
+    player->point_collected[shape_index] = true;
+    
+    player->total_collected_count++;
+
+    player->bounds = calculate_shape_bounds_selective(
+            player->shape.original_points,
+            player->shape.point_count,
+            player->point_collected,
+            player->in_snake_form);
+
+    //TODO add feedback
+}
+
+void check_collectible_collision (GameObject *player, GameState *game) {
+    //avoid sqrt by comparing sq values
+    const float collection_radius = 8.0f;
+    const float collection_radius_sq = collection_radius * collection_radius;\
+
+    for (int i  = 0;i < game->collectible_count;i ++) {
+        CollectiblePoint *cp = &game->collectibles[i];
+        if(!cp->active) {
+            continue;
+        }
+
+        float dx = player->transform.x - cp->x;
+        float dy = player->transform.y - cp->y;
+        float distance_sq = dx * dx + dy * dy;
+
+        if (distance_sq < collection_radius_sq) {
+            collect_point(player, cp, game);
+        }
     }
 }
