@@ -14,5 +14,8 @@ bool check_boundaries(GameObject *obj, int max_x, int max_y);
 bool check_obj_collision(GameObject *obj_a, GameObject *obj_b);
 void commit_transf(GameObject *obj);
 ShapeBounds calculate_shape_bounds (Point *points, int count);
+ShapeBounds calculate_shape_bounds_selective (Point *points, int count,
+                                    bool *collected, bool in_snake_form);
+void bounce (GameObject *obj, int screen_w, int screen_h); 
 
 #endif

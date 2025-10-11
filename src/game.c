@@ -81,6 +81,38 @@ ShapeBounds calculate_shape_bounds (Point *points, int count) {
     return bounds;
 }
 
+ShapeBounds calculate_shape_bounds_selective (Point *points, int count,
+                                    bool *collected, bool in_snake_form) {
+    int first_collected = -1;
+    for (int i = 0; i < count; i++) {
+        if (!in_snake_form || collected[i]) {
+            first_collected = i;
+            break;
+        }
+    }
+    
+    if (first_collected == -1) {
+        return (ShapeBounds){0, 0, 0, 0};
+    }
+
+    ShapeBounds bounds = {
+        .min_x = points[first_collected].x,
+        .max_x = points[first_collected].x,
+        .min_y = points[first_collected].y,
+        .max_y = points[first_collected].y
+    };
+
+    for (int i = first_collected + 1;i < count;i ++) {
+        if (!in_snake_form || collected[i]) {
+            if (points[i].x < bounds.min_x) bounds.min_x = points[i].x;
+            if (points[i].x > bounds.max_x) bounds.max_x = points[i].x;
+            if (points[i].y < bounds.min_y) bounds.min_y = points[i].y;
+            if (points[i].y > bounds.max_y) bounds.max_y = points[i].y;
+        }
+    }
+
+    return bounds;
+}
 int create_object(GameObject objects[], int* count,
         Point *shape_template, int point_count,
         float x, float y, float dx, float dy,
@@ -132,3 +164,22 @@ int create_object(GameObject objects[], int* count,
     return index;
 }
 
+void bounce (GameObject *obj, int screen_w, int screen_h) {
+    float left_edge = obj->transform.x + obj->bounds.min_x;
+    float right_edge = obj->transform.x + obj->bounds.max_x;
+    float top_edge = obj->transform.y + obj->bounds.min_y;
+    float bottom_edge = obj->transform.y + obj->bounds.max_y;
+
+    if (left_edge < 0) {
+        obj->transform.x -= left_edge;
+    }
+    if (right_edge >= screen_w) {
+        obj->transform.x -= (right_edge - screen_w + 1);
+    }
+    if (top_edge < 1) {
+        obj->transform.y -= (top_edge - 1);
+    }
+    if (bottom_edge >= screen_h) {
+        obj->transform.y -= (bottom_edge - screen_h + 1);
+    }
+}

@@ -27,6 +27,11 @@ void setup_morph_forms(GameObject *obj, Point *form_a, int count_a,
     obj->in_snake_form = false;
     obj->is_morphing = false;
 
+    for (int i = 0;i < 100;i ++) {
+        obj->point_collected[i] = true;
+    }
+    obj->total_collected_count = count_a;
+
     obj->shape.original_points = form_a;
     obj->shape.point_count = count_a;
 }
@@ -50,6 +55,11 @@ void initiate_morph(GameObject *obj) {
         target_template = obj->snake_form_template;
         point_count = obj->snake_form_point_count;
         morphing_to_snake = true;
+
+        for (int i = CORE_SNAKE_POINTS;i < point_count;i ++) {
+            obj->point_collected[i] = false;
+        }
+        obj->total_collected_count = CORE_SNAKE_POINTS;
     }
     for (int i = 0;i < point_count;i ++) {
         active_morph.source_points[i] = source_template[i];

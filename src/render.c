@@ -110,7 +110,13 @@ void render_background(int max_x, int max_y, unsigned int frame,
 void render (GameObject *obj, float center_x, float center_y, bool erase, unsigned int frame) {
     char buffer[2000];
     int pos = 0;
+
     for (int i = 0;i < obj->shape.point_count;i ++) {
+
+        if (obj->in_snake_form && !obj->point_collected[i]) {
+            continue;
+        }
+
         int draw_x = (int)center_x + obj->shape.rotated_points[i].x;
         int draw_y = (int)center_y + obj->shape.rotated_points[i].y;
         char ch;

@@ -101,6 +101,15 @@ static void handle_input(GameState *game) {
     if (in_bounds) {
         game->objects[0].transform.x = new_x;
         game->objects[0].transform.y = new_y;
+
+        if (game->objects[0].in_snake_form) {
+            game->objects[0].bounds = calculate_shape_bounds_selective(
+                game->objects[0].shape.original_points,
+                game->objects[0].shape.point_count,
+                game->objects[0].point_collected,
+                game->objects[0].in_snake_form
+                );
+        }
         update_visual(&game->objects[0]);
     }
 }
@@ -163,6 +172,7 @@ int main () {
         update_sectors(&game);
         handle_input(&game);
         update_morph(&game.objects[0], game.frame);
+        bounce(&game.objects[0], game.max_x, game.max_y); 
         render_game(&game);
         //update_transform(&objects[0], max_x, max_y);
         //bool hit_b = check_boundaries(&objects[0], max_x, max_y);

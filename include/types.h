@@ -6,6 +6,7 @@
 #define MAX_OBJECTS 50
 #define SECTOR_COLS 8
 #define SECTOR_ROWS 4
+#define CORE_SNAKE_POINTS 15
 
 typedef struct Sector {
     bool is_dangerous;
@@ -64,13 +65,24 @@ typedef struct GameObject {
     CollisionShape collision;
     ShapeBounds bounds;
     bool active;
+
     Point *demon_form_template;
     int demon_form_point_count;
     Point *snake_form_template;
     int snake_form_point_count;
     bool is_morphing;
     bool in_snake_form;
+
+    bool point_collected[100];
+    int total_collected_count;
 } GameObject;
+
+typedef struct CollectiblePoint {
+    float x, y;
+    float dx, dy;
+    int shape_index;
+    bool active;
+} CollectiblePoint;
 
 typedef struct GameState {
     GameObject objects[MAX_OBJECTS];
