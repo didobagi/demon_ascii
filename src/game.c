@@ -132,4 +132,3 @@ int create_object(GameObject objects[], int* count,
     return index;
 }
 
-

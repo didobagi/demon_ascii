@@ -64,6 +64,12 @@ typedef struct GameObject {
     CollisionShape collision;
     ShapeBounds bounds;
     bool active;
+    Point *demon_form_template;
+    int demon_form_point_count;
+    Point *snake_form_template;
+    int snake_form_point_count;
+    bool is_morphing;
+    bool in_snake_form;
 } GameObject;
 
 typedef struct GameState {

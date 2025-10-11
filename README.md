@@ -6,6 +6,10 @@
 ## run
 ```./main```
 
+### commands:
+* move with `ARROW` keys
+* `SPACE` to morph
+* `q`
 
 ### TODO:
 * add damage

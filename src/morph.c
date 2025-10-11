@@ -1,0 +1,112 @@
+#include "../include/morph.h"
+#include "../include/game.h"
+#include <stdlib.h>
+#include <string.h>
+
+#define MORPH_DURATION_FRAMES 30
+
+typedef struct MorphState {
+    Point source_points[100];
+    Point target_points[100];
+    Point morphing_points[100];
+    int point_count;
+    unsigned int start_frame;
+    bool morphing_to_snake;
+} MorphState;
+
+static MorphState active_morph = {0};
+static bool morph_in_progress = false;
+
+void setup_morph_forms(GameObject *obj, Point *form_a, int count_a,
+                       Point *form_b, int count_b) {
+    obj->demon_form_template = form_a;
+    obj->demon_form_point_count = count_a;
+    obj->snake_form_template = form_b;
+    obj->snake_form_point_count = count_b;
+
+    obj->in_snake_form = false;
+    obj->is_morphing = false;
+
+    obj->shape.original_points = form_a;
+    obj->shape.point_count = count_a;
+}
+
+void initiate_morph(GameObject *obj) {
+    if (obj->is_morphing) {
+        return;
+    }
+    Point *source_template;
+    Point *target_template;
+    int point_count;
+    bool morphing_to_snake;
+
+    if(obj->in_snake_form) {
+        source_template = obj->snake_form_template;
+        target_template = obj->demon_form_template;
+        point_count = obj->demon_form_point_count;
+        morphing_to_snake = false;
+    } else {
+        source_template = obj->demon_form_template;
+        target_template = obj->snake_form_template;
+        point_count = obj->snake_form_point_count;
+        morphing_to_snake = true;
+    }
+    for (int i = 0;i < point_count;i ++) {
+        active_morph.source_points[i] = source_template[i];
+        active_morph.target_points[i] = target_template[i];
+        active_morph.morphing_points[i] = source_template[i];
+    }
+    active_morph.point_count = point_count;
+    active_morph.morphing_to_snake = morphing_to_snake;
+    active_morph.start_frame = 0;
+
+    obj->shape.original_points = active_morph.morphing_points;
+    obj->shape.point_count = point_count;
+
+    obj->is_morphing = true;
+    morph_in_progress = true;
+}
+
+bool update_morph(GameObject *obj, unsigned int frame) {
+    if (!obj->is_morphing) {
+        return false;
+    }
+
+    if (active_morph.start_frame == 0) {
+        active_morph.start_frame = frame;
+    }
+    
+    unsigned int frame_elapsed = frame - active_morph.start_frame;
+    float progress = (float)frame_elapsed / (float)MORPH_DURATION_FRAMES;
+    if (progress > 1.0f) {
+        progress = 1.0f;
+    }
+    //lerp!!!  l(a,b,t) = a + t * (b-a)
+    for (int i = 0;i < active_morph.point_count;i ++) {
+        float dx = active_morph.target_points[i].x - active_morph.source_points[i].x;
+        float dy = active_morph.target_points[i].y - active_morph.source_points[i].y;
+
+        active_morph.morphing_points[i].x = active_morph.source_points[i].x + (int)(progress * dx);
+        active_morph.morphing_points[i].y = active_morph.source_points[i].y + (int)(progress * dy);
+    }
+
+    obj->bounds = calculate_shape_bounds(obj->shape.original_points,
+                                         obj->shape.point_count);
+    update_visual(obj);
+
+    if (progress >= 1.0f) {
+        obj->is_morphing = false;
+        morph_in_progress = false;
+        obj->in_snake_form = !obj->in_snake_form;
+
+        if (obj->in_snake_form) {
+            obj->shape.original_points = obj->snake_form_template;
+            obj->shape.point_count = obj->snake_form_point_count;
+        } else {
+            obj->shape.original_points = obj->demon_form_template;
+            obj->shape.point_count = obj->demon_form_point_count;
+        }
+        return false;
+    }
+    return true;
+}
