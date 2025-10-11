@@ -249,7 +249,7 @@ void render_collectibles (CollectiblePoint * collectibles, int count, unsigned i
     fflush(stdout);
 }
 
-void render_enemies (Enemy *enemies, int count, unsigned int frame) {
+void render_enemies (Enemy *enemies, int count, int screen_w, int screen_h, unsigned int frame) {
     for (int i = 0;i < count;i ++) {
         Enemy *enemy = &enemies[i];
 
@@ -261,7 +261,7 @@ void render_enemies (Enemy *enemies, int count, unsigned int frame) {
             int draw_x = (int)enemy->x + enemy->rotated_points[j].x;
             int draw_y = (int)enemy->y + enemy->rotated_points[j].y;
 
-            if (draw_x < 1 || draw_x >= 112 || draw_y < 1 || draw_y >= 33) {
+            if (draw_x < 1 || draw_x >= screen_w || draw_y < 1 || draw_y >= screen_h) {
                 continue;
             }
             printf("\033[%d;%dH\033[36m@\033[0m", draw_y, draw_x);

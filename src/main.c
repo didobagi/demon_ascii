@@ -123,7 +123,7 @@ static void handle_input(GameState *game) {
 void render_game(GameState *game) {
     render_background(game->max_x, game->max_y, game->frame, game->sectors);
     render_collectibles(game->collectibles, game->collectible_count, game->frame);
-    render_enemies(game->enemies, game->enemy_count, game->frame);   
+    render_enemies(game->enemies, game->enemy_count,game->max_x,game->max_y, game->frame);   
 
     for (int i = 0;i < game->object_count;i ++) {
         if(game->objects[i].active) {
