@@ -14,6 +14,7 @@
 #include "../include/game.h"
 #include "../include/input.h"
 #include "../include/splash.h"
+#include "../include/morph.h"
 
 void init (int *width, int *height) {
     usleep(50000);
@@ -44,9 +45,13 @@ void initialise_game (GameState *game) {
     game->object_count = 0;
 
     create_object(game->objects, &game->object_count,
-            demon_template, demon_point_count,
+            demon_snake_template, demon_snake_point_count,
             12.0, 12.0, 1.0, 0.0,
             6.0, TEXTURE_GRADIENT);
+
+    setup_morph_forms(&game->objects[0],
+                      demon_template, demon_point_count, 
+                      demon_snake_template, 50);
 
     game->frame = 0;
 }
@@ -72,6 +77,10 @@ static void handle_input(GameState *game) {
         exit(0);
     }
     
+    if (key == KEY_MORPH) {
+        initiate_morph(&game->objects[0]);
+        return;
+    }
     float step_size = 2.0;
     float new_x = game->objects[0].transform.x;
     float new_y = game->objects[0].transform.y;
@@ -144,7 +153,7 @@ int main () {
     int term_width = w.ws_col;
     int term_height = w.ws_row;
 
-    show_splash_screen(term_width, term_height);
+    //show_splash_screen(term_width, term_height);
 
     GameState game;
     initialise_game(&game);
@@ -153,6 +162,7 @@ int main () {
         game.frame++;
         update_sectors(&game);
         handle_input(&game);
+        update_morph(&game.objects[0], game.frame);
         render_game(&game);
         //update_transform(&objects[0], max_x, max_y);
         //bool hit_b = check_boundaries(&objects[0], max_x, max_y);
