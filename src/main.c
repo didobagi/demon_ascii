@@ -44,7 +44,7 @@ void initialise_game (GameState *game) {
     game->object_count = 0;
 
     create_object(game->objects, &game->object_count,
-            demon_snake_template, demon_snake_point_count,
+            demon_template, demon_point_count,
             12.0, 12.0, 1.0, 0.0,
             6.0, TEXTURE_GRADIENT);
 
