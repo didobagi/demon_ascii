@@ -81,10 +81,44 @@ ShapeBounds calculate_shape_bounds (Point *points, int count) {
     return bounds;
 }
 
+ShapeBounds calculate_shape_bounds_selective (Point *points, int count,
+                                    bool *collected, bool in_snake_form) {
+    int first_collected = -1;
+    for (int i = 0; i < count; i++) {
+        if (!in_snake_form || collected[i]) {
+            first_collected = i;
+            break;
+        }
+    }
+    
+    if (first_collected == -1) {
+        return (ShapeBounds){0, 0, 0, 0};
+    }
+
+    ShapeBounds bounds = {
+        .min_x = points[first_collected].x,
+        .max_x = points[first_collected].x,
+        .min_y = points[first_collected].y,
+        .max_y = points[first_collected].y
+    };
+
+    for (int i = first_collected + 1;i < count;i ++) {
+        if (!in_snake_form || collected[i]) {
+            if (points[i].x < bounds.min_x) bounds.min_x = points[i].x;
+            if (points[i].x > bounds.max_x) bounds.max_x = points[i].x;
+            if (points[i].y < bounds.min_y) bounds.min_y = points[i].y;
+            if (points[i].y > bounds.max_y) bounds.max_y = points[i].y;
+        }
+    }
+
+    return bounds;
+}
+
 int create_object(GameObject objects[], int* count,
         Point *shape_template, int point_count,
         float x, float y, float dx, float dy,
-        float collision_radius, TextureType texture) {
+        float collision_radius, TextureType texture,
+        Color color) {
     if(*count >= MAX_OBJECTS) {
         return -1;
     }
@@ -97,6 +131,7 @@ int create_object(GameObject objects[], int* count,
     obj->transform.angle = atan2(dy, dx);
     obj->transform.dx = dx;
     obj->transform.dy = dy;
+    obj->color = color;
 
     obj->shape.original_points = shape_template;
     obj->shape.rotated_points = rotated_buffers[*count];
@@ -132,3 +167,143 @@ int create_object(GameObject objects[], int* count,
     return index;
 }
 
+void bounce (GameObject *obj, int screen_w, int screen_h) {
+    float left_edge = obj->transform.x + obj->bounds.min_x;
+    float right_edge = obj->transform.x + obj->bounds.max_x;
+    float top_edge = obj->transform.y + obj->bounds.min_y;
+    float bottom_edge = obj->transform.y + obj->bounds.max_y;
+
+    if (left_edge < 0) {
+        obj->transform.x -= left_edge;
+    }
+    if (right_edge >= screen_w) {
+        obj->transform.x -= (right_edge - screen_w + 1);
+    }
+    if (top_edge < 1) {
+        obj->transform.y -= (top_edge - 1);
+    }
+    if (bottom_edge >= screen_h) {
+        obj->transform.y -= (bottom_edge - screen_h + 1);
+    }
+}
+
+void collect_point (GameObject *player, CollectiblePoint *cp, GameState *game) {
+    cp->active = false;
+
+    int shape_index = cp->shape_point_index;
+    player->point_collected[shape_index] = true;
+    
+    player->total_collected_count++;
+
+    player->bounds = calculate_shape_bounds_selective(
+            player->shape.original_points,
+            player->shape.point_count,
+            player->point_collected,
+            player->in_snake_form);
+
+    //TODO add feedback
+}
+
+void check_collectible_collision (GameObject *player, GameState *game) {
+    //avoid sqrt by comparing sq values
+    const float collection_radius = 8.0f;
+    const float collection_radius_sq = collection_radius * collection_radius;\
+
+    for (int i  = 0;i < game->collectible_count;i ++) {
+        CollectiblePoint *cp = &game->collectibles[i];
+        if(!cp->active) {
+            continue;
+        }
+
+        float dx = player->transform.x - cp->x;
+        float dy = player->transform.y - cp->y;
+        float distance_sq = dx * dx + dy * dy;
+
+        if (distance_sq < collection_radius_sq) {
+            collect_point(player, cp, game);
+        }
+    }
+}
+
+void spawn_enemy (GameState *game, Point *shape_template, int point_count,
+                  float x, float y, float speed) {
+    Enemy *enemy = NULL;
+    for (int i = 0;i < game->enemy_count;i ++) {
+        if (!game->enemies[i].active) {
+            enemy = &game->enemies[i];
+            break;
+        }
+    }
+
+    if (enemy == NULL && game->enemy_count < 10) {
+        enemy = &game->enemies[game->enemy_count];
+        game->enemy_count ++;
+    }
+
+    if (enemy == NULL) {
+        return;
+    }
+
+    //init enemy
+    enemy->x = x;
+    enemy->y = y;
+    enemy->dx = 0.0f;
+    enemy->dy = 0.0f;
+    enemy->shape_template = shape_template;
+    enemy->point_count = point_count;
+    enemy->angle = 0.0f;
+    enemy->speed = speed;
+    enemy->active = true;
+
+    enemy->bounds = calculate_shape_bounds(shape_template, point_count);
+
+    for (int i = 0;i < point_count;i ++) {
+        enemy->rotated_points[i] = shape_template[i];
+    }
+}
+
+
+void update_enemy_ai (Enemy *enemy, GameObject *player) {
+    float to_player_x = player->transform.x - enemy->x;
+    float to_player_y = player->transform.y - enemy->y;
+
+    float distance = sqrt(to_player_x * to_player_x + to_player_y * to_player_y);
+    if (distance < 1.0f) {
+        enemy->dx = 0.0f;
+        enemy->dy = 0.0f;
+        return;
+    }
+
+    //normalize
+    enemy->dx = (to_player_x / distance) *enemy->speed;
+    enemy->dy = (to_player_y / distance) *enemy->speed;
+
+    enemy->angle = atan2(enemy->dy, enemy->dx);
+
+}
+
+void update_enemies (GameState *game) {
+    GameObject *player = &game->objects[0];
+
+    for (int i = 0;i < game->enemy_count;i ++) {
+        Enemy *enemy = &game->enemies[i];
+    
+        if(!enemy->active) {
+            continue;
+        }
+
+        update_enemy_ai(enemy, player);
+
+        enemy->x += enemy->dx;
+        enemy->y += enemy->dy;
+        
+        float angle = enemy->angle;
+        for (int j = 0;j < enemy->point_count;j ++) {
+            float x = enemy->shape_template[j].x;
+            float y = enemy->shape_template[j].x;
+
+            enemy->rotated_points[j].x = (int)(x * cos(angle) - y * sin(angle));
+            enemy->rotated_points[j].y = (int)(x * sin(angle) + y * cos(angle));
+        }
+    }
+}

@@ -2,6 +2,7 @@
 #include "../include/game.h"
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define MORPH_DURATION_FRAMES 30
 
@@ -18,7 +19,8 @@ static MorphState active_morph = {0};
 static bool morph_in_progress = false;
 
 void setup_morph_forms(GameObject *obj, Point *form_a, int count_a,
-                       Point *form_b, int count_b) {
+        Point *form_b, int count_b) {
+
     obj->demon_form_template = form_a;
     obj->demon_form_point_count = count_a;
     obj->snake_form_template = form_b;
@@ -27,8 +29,17 @@ void setup_morph_forms(GameObject *obj, Point *form_a, int count_a,
     obj->in_snake_form = false;
     obj->is_morphing = false;
 
+    for (int i = 0;i < 100;i ++) {
+        obj->point_collected[i] = true;
+    }
+    obj->total_collected_count = count_a;
+
     obj->shape.original_points = form_a;
     obj->shape.point_count = count_a;
+
+    obj->health = 5;
+    obj->max_health = 5;
+    obj->last_damage_frame = 0;
 }
 
 void initiate_morph(GameObject *obj) {
@@ -41,6 +52,9 @@ void initiate_morph(GameObject *obj) {
     bool morphing_to_snake;
 
     if(obj->in_snake_form) {
+        if (obj->total_collected_count < obj->snake_form_point_count) {
+            return;
+        }
         source_template = obj->snake_form_template;
         target_template = obj->demon_form_template;
         point_count = obj->demon_form_point_count;
@@ -50,6 +64,11 @@ void initiate_morph(GameObject *obj) {
         target_template = obj->snake_form_template;
         point_count = obj->snake_form_point_count;
         morphing_to_snake = true;
+
+        for (int i = CORE_SNAKE_POINTS;i < point_count;i ++) {
+            obj->point_collected[i] = false;
+        }
+        obj->total_collected_count = CORE_SNAKE_POINTS;
     }
     for (int i = 0;i < point_count;i ++) {
         active_morph.source_points[i] = source_template[i];
@@ -67,7 +86,29 @@ void initiate_morph(GameObject *obj) {
     morph_in_progress = true;
 }
 
-bool update_morph(GameObject *obj, unsigned int frame) {
+static void spawn_collectible_for_morph (GameObject *obj, GameState *game,
+                                         int screen_w, int screen_h) {
+    game->collectible_count =0;
+    int collectible_index = 0;
+    for (int shape_index = CORE_SNAKE_POINTS;shape_index < obj->snake_form_point_count;shape_index ++) {
+        CollectiblePoint *cp = &game->collectibles[collectible_index];
+
+        int margin = 5; //leave so not right on the screen
+
+        cp->x = margin + ((float)rand() / RAND_MAX) * (screen_w - 2 * margin);
+        cp->y = margin + ((float)rand() / RAND_MAX) * (screen_h - 2 * margin);
+
+        cp->shape_point_index = shape_index;
+        cp->active = true;
+
+        //TODO drift
+
+        collectible_index ++;
+    }
+    game->collectible_count = collectible_index;
+}
+
+bool update_morph(GameObject *obj, GameState *game, unsigned int frame) {
     if (!obj->is_morphing) {
         return false;
     }
@@ -101,12 +142,13 @@ bool update_morph(GameObject *obj, unsigned int frame) {
 
         if (obj->in_snake_form) {
             obj->shape.original_points = obj->snake_form_template;
-            obj->shape.point_count = obj->snake_form_point_count;
+            spawn_collectible_for_morph(obj,game, game->max_x, game->max_y);
         } else {
             obj->shape.original_points = obj->demon_form_template;
-            obj->shape.point_count = obj->demon_form_point_count;
         }
         return false;
     }
     return true;
 }
+
+

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <time.h>
@@ -28,13 +29,14 @@ void init (int *width, int *height) {
 }
 
 void initialise_game (GameState *game) {
+    memset(game, 0, sizeof(GameState));
     init(&game->max_x, &game->max_y);
     enable_raw_mode();
     atexit(disable_raw_mode);
     for (int row = 0;row < SECTOR_ROWS; row++) {
         for (int col= 0;col < SECTOR_COLS;col++) {
             int random_val = rand() % 100;
-            if (random_val < 30) {
+            if (random_val < 0) {
                 game->sectors[row][col].is_dangerous = true;
             } else {
                 game->sectors[row][col].is_dangerous = false;
@@ -45,13 +47,17 @@ void initialise_game (GameState *game) {
     game->object_count = 0;
 
     create_object(game->objects, &game->object_count,
-            demon_snake_template, demon_snake_point_count,
+            demon_template, demon_point_count,
             12.0, 12.0, 1.0, 0.0,
-            6.0, TEXTURE_GRADIENT);
+            6.0, TEXTURE_GRADIENT,
+            COLOR_BRIGHT_RED);
 
     setup_morph_forms(&game->objects[0],
                       demon_template, demon_point_count, 
                       demon_snake_template, 50);
+
+    spawn_enemy(game, ghost_template, ghost_point_count,
+            game->max_x / 2, game->max_y / 2, 0.5f);
 
     game->frame = 0;
 }
@@ -101,18 +107,36 @@ static void handle_input(GameState *game) {
     if (in_bounds) {
         game->objects[0].transform.x = new_x;
         game->objects[0].transform.y = new_y;
+
+        if (game->objects[0].in_snake_form) {
+            game->objects[0].bounds = calculate_shape_bounds_selective(
+                game->objects[0].shape.original_points,
+                game->objects[0].shape.point_count,
+                game->objects[0].point_collected,
+                game->objects[0].in_snake_form
+                );
+        }
         update_visual(&game->objects[0]);
     }
 }
 
 void render_game(GameState *game) {
     render_background(game->max_x, game->max_y, game->frame, game->sectors);
+    render_collectibles(game->collectibles, game->collectible_count, game->frame);
+    render_enemies(game->enemies, game->enemy_count,game->max_x,game->max_y, game->frame);   
 
     for (int i = 0;i < game->object_count;i ++) {
         if(game->objects[i].active) {
             render(&game->objects[i], game->objects[i].transform.x,
                     game->objects[i].transform.y,false, game->frame);
         }
+    }
+    if (game->objects[0].in_snake_form) {
+        printf("\033[1;1H");
+        printf("Points Collected: %d OF %d",
+                game->objects[0].total_collected_count,
+                game->objects[0].snake_form_point_count);
+        fflush(stdout);
     }
 }
 
@@ -160,9 +184,16 @@ int main () {
 
     while (1) {
         game.frame++;
-        update_sectors(&game);
+        //update_sectors(&game);
         handle_input(&game);
-        update_morph(&game.objects[0], game.frame);
+        update_morph(&game.objects[0],&game, game.frame);
+        
+       update_enemies(&game); 
+
+        if (game.objects[0].in_snake_form) {
+            check_collectible_collision(&game.objects[0], &game);
+        }
+        bounce(&game.objects[0], game.max_x, game.max_y); 
         render_game(&game);
         //update_transform(&objects[0], max_x, max_y);
         //bool hit_b = check_boundaries(&objects[0], max_x, max_y);

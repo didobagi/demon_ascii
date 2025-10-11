@@ -9,7 +9,7 @@
 ### commands:
 * move with `ARROW` keys
 * `SPACE` to morph
-* `q`
+* `q` to quit
 
 ### TODO:
 * add damage

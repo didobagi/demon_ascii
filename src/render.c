@@ -2,6 +2,25 @@
 #include <stdio.h>
 #include <math.h>
 
+static const char* COLOR_CODES[] = {
+    "\033[30m",  // BLACK
+    "\033[31m",  // RED
+    "\033[32m",  // GREEN
+    "\033[33m",  // YELLOW
+    "\033[34m",  // BLUE
+    "\033[35m",  // MAGENTA
+    "\033[36m",  // CYAN
+    "\033[37m",  // WHITE
+    "\033[90m",  // BRIGHT_BLACK (dark grey)
+    "\033[91m",  // BRIGHT_RED
+    "\033[92m",  // BRIGHT_GREEN
+    "\033[93m",  // BRIGHT_YELLOW
+    "\033[94m",  // BRIGHT_BLUE
+    "\033[95m",  // BRIGHT_MAGENTA
+    "\033[96m",  // BRIGHT_CYAN
+    "\033[97m"   // BRIGHT_WHITE
+};
+
 char get_char_for_distance (float distance) {
     if (distance < 2.0) return '*';
     if (distance < 4.0) return '+';
@@ -78,39 +97,71 @@ char get_sector_fire_char (int x, int y, float y_ratio, unsigned int frame) {
 }
 
 void render_background(int max_x, int max_y, unsigned int frame,
-                        Sector sectors[SECTOR_ROWS][SECTOR_COLS]) {
+        Sector sectors[SECTOR_ROWS][SECTOR_COLS]) {
     int sector_w = max_x / SECTOR_COLS;
     int sector_h = max_y / SECTOR_ROWS;
 
+    static char buffer[100000];
+    int pos = 0;
+
+    int current_sector_x = -1;
+    int current_sector_y = -1;
+    bool current_is_dangerous = false;
+
     for (int y = 1; y <= max_y; y++) {
-        printf("\033[%d;1H", y); 
+        pos += sprintf(buffer + pos, "\033[%d;1H", y); 
+
         for (int x = 1; x <= max_x; x++) {
             int sector_x = (x - 1) / sector_w;
             int sector_y = (y - 1) / sector_h;
 
             if (sector_x >= SECTOR_COLS) sector_x = SECTOR_COLS - 1;
             if (sector_y >= SECTOR_ROWS) sector_y = SECTOR_ROWS - 1;
-            
+
+            if (sector_x != current_sector_x || sector_y != current_sector_y) {
+                current_sector_x = sector_x;
+                current_sector_y = sector_y;
+                current_is_dangerous = sectors[sector_y][sector_x].is_dangerous;
+
+                if (current_is_dangerous) {
+                    pos += sprintf(buffer + pos, "%s", COLOR_CODES[COLOR_BRIGHT_RED]);
+                } else {
+                    pos += sprintf(buffer + pos, "%s", COLOR_CODES[COLOR_BRIGHT_BLACK]);
+                }
+            }
+
             char ch;
-            if (sectors[sector_y][sector_x].is_dangerous) {
+            if (current_is_dangerous) {
                 int sector_start_y = sector_y * sector_h + 1;
                 int y_in_sector = y - sector_start_y;
                 float y_ratio = (float)y_in_sector / (float)sector_h;
-
                 ch = get_sector_fire_char(x, y, y_ratio, frame);
             } else {
                 ch = 'A';
             }
-            putchar(ch);
+            buffer[pos++] = ch;
         }
     }
+    pos += sprintf(buffer + pos, "\033[0m");
+
+    printf("%s", buffer);
     fflush(stdout);
 }
 
 void render (GameObject *obj, float center_x, float center_y, bool erase, unsigned int frame) {
     char buffer[2000];
     int pos = 0;
+
+    if (!erase) {
+        pos += sprintf(buffer + pos, "%s", COLOR_CODES[obj->color]);
+    }
+
     for (int i = 0;i < obj->shape.point_count;i ++) {
+
+        if (obj->in_snake_form && !obj->point_collected[i]) {
+            continue;
+        }
+
         int draw_x = (int)center_x + obj->shape.rotated_points[i].x;
         int draw_y = (int)center_y + obj->shape.rotated_points[i].y;
         char ch;
@@ -140,9 +191,13 @@ void render (GameObject *obj, float center_x, float center_y, bool erase, unsign
         pos += sprintf(buffer + pos, "\033[%d;%dH", draw_y, draw_x);
         pos += sprintf(buffer + pos, "%c",ch);
     }
+    if (!erase) {
+        pos += sprintf(buffer + pos, "\033[0m");
+    }
     printf("%s", buffer);
     fflush(stdout);
 }
+
 void render_text(const char *text, int x, int y) {
     printf("\033[%d;%dH", y, x);
     printf("%s", text);
@@ -166,5 +221,51 @@ void render_text_centered(const char *text, int term_w, int term_h, int y_offset
 void render_char(char ch, int x, int y) {
     printf("\033[%d;%dH", y, x);
     putchar(ch);
+    fflush(stdout);
+}
+
+void render_collectibles (CollectiblePoint * collectibles, int count, unsigned int frame) {   
+    
+    const char anim_chars[] = {'!', '?', '.', '+'};
+    const int anim_chars_count = 4;
+
+    for (int i  = 0;i < count;i ++) {
+        CollectiblePoint *cp = &collectibles[i];
+
+        if(!cp->active) {
+            continue;
+        }
+
+        //TODO apply drift
+        int animation_phase = (frame + i * 7) / 10;
+        int char_index = animation_phase % anim_chars_count;
+        char ch = anim_chars[char_index];
+
+        float render_x = cp->x;
+        float render_y = cp->y;
+        printf("\033[%d;%dH", (int)render_y, (int)render_x);
+        printf("%c",ch);
+    }
+    fflush(stdout);
+}
+
+void render_enemies (Enemy *enemies, int count, int screen_w, int screen_h, unsigned int frame) {
+    for (int i = 0;i < count;i ++) {
+        Enemy *enemy = &enemies[i];
+
+        if(!enemy->active) {
+            continue;
+        }
+        
+        for (int j = 0;j < enemy->point_count;j ++) {
+            int draw_x = (int)enemy->x + enemy->rotated_points[j].x;
+            int draw_y = (int)enemy->y + enemy->rotated_points[j].y;
+
+            if (draw_x < 1 || draw_x >= screen_w || draw_y < 1 || draw_y >= screen_h) {
+                continue;
+            }
+            printf("\033[%d;%dH\033[36m@\033[0m", draw_y, draw_x);
+        }
+    }
     fflush(stdout);
 }
