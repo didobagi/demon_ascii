@@ -7,7 +7,8 @@
 int create_object (GameObject objects[], int* count,
                    Point *shape_template, int point_count,
                    float x, float y, float dx, float dy,
-                   float collision_radius, TextureType texture);
+                   float collision_radius, TextureType texture,
+                   Color color);
 void update_transform(GameObject *obj, int max_x, int max_y);
 void update_visual(GameObject *obj);
 bool check_boundaries(GameObject *obj, int max_x, int max_y);

@@ -117,7 +117,8 @@ ShapeBounds calculate_shape_bounds_selective (Point *points, int count,
 int create_object(GameObject objects[], int* count,
         Point *shape_template, int point_count,
         float x, float y, float dx, float dy,
-        float collision_radius, TextureType texture) {
+        float collision_radius, TextureType texture,
+        Color color) {
     if(*count >= MAX_OBJECTS) {
         return -1;
     }
@@ -130,6 +131,7 @@ int create_object(GameObject objects[], int* count,
     obj->transform.angle = atan2(dy, dx);
     obj->transform.dx = dx;
     obj->transform.dy = dy;
+    obj->color = color;
 
     obj->shape.original_points = shape_template;
     obj->shape.rotated_points = rotated_buffers[*count];

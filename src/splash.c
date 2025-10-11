@@ -24,40 +24,40 @@ static void wait_for_kp (void) {
 
 static void animate_text_morph (const char *text, int start_x, int start_y) {
     int text_len = 0;
-    for(const char *p = text;*p != '\0';p ++) text_len++;
-        int morph_timers[100];
-        for (int i = 0;i < text_len;i ++) {
-            morph_timers[i] = 10 + (rand() % 31);
-        }
+    for(const char *p = text; *p != '\0'; p++) text_len++;
+    
+    int morph_timers[100];
+    for (int i = 0; i < text_len; i++) {
+        morph_timers[i] = 10 + (rand() % 31);
+    }
 
-        const char morph_chars[] = {'#', '@', '*', '%', '+', '=', '-', '~', 'O', '0', 'X', 'A'};
-        int morph_chars_count = 12;
+    const char morph_chars[] = {'#', '@', '*', '%', '+', '=', '-', '~', 'O', '0', 'X', 'A'};
+    int morph_chars_count = 12;
 
-        bool all_done = false;
+    bool all_done = false;
 
-        while (!all_done) {
-            all_done = true;
+    while (!all_done) {
+        all_done = true;
 
-            for (int i = 0;i < text_len;i ++) {
-                if(morph_timers[i] > 0) {
-                    all_done = false;
-
-                    if (morph_timers[i] > 1) {
-                        char random_char = morph_chars[rand() % morph_chars_count];
-                        render_char(random_char, start_x + i, start_y);
-                    } else {
-                    
-                        render_char('A', start_x + i, start_y);
-                    
-                    }
-                    morph_timers[i]--;
-                }
+        for (int i = 0; i < text_len; i++) {
+            if (morph_timers[i] > 1) {
+                all_done = false;
+                char random_char = morph_chars[rand() % morph_chars_count];
+                printf("\033[%d;%dH%c", start_y, start_x + i, random_char);
+                morph_timers[i]--;
+            } else if (morph_timers[i] == 1) {
+                printf("\033[%d;%dH\033[90mA\033[0m", start_y, start_x + i);
+                morph_timers[i]--;
+            } else {
+                // Timer is 0 - still render the grey A every frame
+                printf("\033[%d;%dH\033[90mA\033[0m", start_y, start_x + i);
             }
-
-            usleep(50000);
         }
+        fflush(stdout);
+        usleep(50000);
+    }
 
-        usleep(500000);
+    usleep(500000);
 }
 
 static void wait_for_keypress(void) {
