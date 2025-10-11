@@ -49,7 +49,6 @@ static void animate_text_morph (const char *text, int start_x, int start_y) {
                 printf("\033[%d;%dH\033[90mA\033[0m", start_y, start_x + i);
                 morph_timers[i]--;
             } else {
-                // Timer is 0 - still render the grey A every frame
                 printf("\033[%d;%dH\033[90mA\033[0m", start_y, start_x + i);
             }
         }
@@ -67,8 +66,8 @@ static void wait_for_keypress(void) {
     
     raw = original;
     raw.c_lflag &= ~(ICANON | ECHO);
-    raw.c_cc[VMIN] = 1;   // Block until 1 character received
-    raw.c_cc[VTIME] = 0;  // No timeout
+    raw.c_cc[VMIN] = 1;   
+    raw.c_cc[VTIME] = 0; 
     
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
     
@@ -96,6 +95,5 @@ void show_splash_screen(int term_width, int term_height) {
     int text_x = center_x - (text_len / 2);
     int text_y = center_y - 2;
     
-    // Animate the text morphing into A's
     animate_text_morph(message, text_x, text_y);
 }

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <time.h>
@@ -28,6 +29,7 @@ void init (int *width, int *height) {
 }
 
 void initialise_game (GameState *game) {
+    memset(game, 0, sizeof(GameState));
     init(&game->max_x, &game->max_y);
     enable_raw_mode();
     atexit(disable_raw_mode);
@@ -53,6 +55,9 @@ void initialise_game (GameState *game) {
     setup_morph_forms(&game->objects[0],
                       demon_template, demon_point_count, 
                       demon_snake_template, 50);
+
+    spawn_enemy(game, ghost_template, ghost_point_count,
+            game->max_x / 2, game->max_y / 2, 0.5f);
 
     game->frame = 0;
 }
@@ -118,6 +123,7 @@ static void handle_input(GameState *game) {
 void render_game(GameState *game) {
     render_background(game->max_x, game->max_y, game->frame, game->sectors);
     render_collectibles(game->collectibles, game->collectible_count, game->frame);
+    render_enemies(game->enemies, game->enemy_count, game->frame);   
 
     for (int i = 0;i < game->object_count;i ++) {
         if(game->objects[i].active) {
@@ -127,7 +133,7 @@ void render_game(GameState *game) {
     }
     if (game->objects[0].in_snake_form) {
         printf("\033[1;1H");
-        printf("Points: %d, %d",
+        printf("Points Collected: %d OF %d",
                 game->objects[0].total_collected_count,
                 game->objects[0].snake_form_point_count);
         fflush(stdout);
@@ -171,7 +177,7 @@ int main () {
     int term_width = w.ws_col;
     int term_height = w.ws_row;
 
-    show_splash_screen(term_width, term_height);
+    //show_splash_screen(term_width, term_height);
 
     GameState game;
     initialise_game(&game);
@@ -181,6 +187,9 @@ int main () {
         //update_sectors(&game);
         handle_input(&game);
         update_morph(&game.objects[0],&game, game.frame);
+        
+       update_enemies(&game); 
+
         if (game.objects[0].in_snake_form) {
             check_collectible_collision(&game.objects[0], &game);
         }

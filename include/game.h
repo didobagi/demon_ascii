@@ -19,5 +19,7 @@ ShapeBounds calculate_shape_bounds (Point *points, int count);
 ShapeBounds calculate_shape_bounds_selective (Point *points, int count,
                                     bool *collected, bool in_snake_form);
 void bounce (GameObject *obj, int screen_w, int screen_h); 
-
+void spawn_enemy (GameState *game, Point *shape_template, int point_count,
+                  float x, float y, float speed); 
+void update_enemies (GameState *game);
 #endif

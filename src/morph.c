@@ -19,7 +19,8 @@ static MorphState active_morph = {0};
 static bool morph_in_progress = false;
 
 void setup_morph_forms(GameObject *obj, Point *form_a, int count_a,
-                       Point *form_b, int count_b) {
+        Point *form_b, int count_b) {
+
     obj->demon_form_template = form_a;
     obj->demon_form_point_count = count_a;
     obj->snake_form_template = form_b;
@@ -35,6 +36,10 @@ void setup_morph_forms(GameObject *obj, Point *form_a, int count_a,
 
     obj->shape.original_points = form_a;
     obj->shape.point_count = count_a;
+
+    obj->health = 5;
+    obj->max_health = 5;
+    obj->last_damage_frame = 0;
 }
 
 void initiate_morph(GameObject *obj) {

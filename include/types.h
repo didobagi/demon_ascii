@@ -104,7 +104,22 @@ typedef struct GameObject {
     bool point_collected[100];
     int total_collected_count;
 
+    int  health;
+    int  max_health;
+    unsigned int last_damage_frame;
 } GameObject;
+
+typedef struct Enemy{
+    float x, y;
+    float dx, dy;
+    Point *shape_template;
+    int point_count;
+    Point rotated_points[100];
+    float angle;
+    ShapeBounds bounds;
+    float speed;
+    bool active;
+} Enemy;
 
 typedef struct GameState {
     GameObject objects[MAX_OBJECTS];
@@ -116,6 +131,9 @@ typedef struct GameState {
 
     CollectiblePoint collectibles[50];
     int collectible_count;
+
+    Enemy enemies[10];
+    int enemy_count;
 } GameState;
 
 typedef struct KeyState {

@@ -224,3 +224,86 @@ void check_collectible_collision (GameObject *player, GameState *game) {
         }
     }
 }
+
+void spawn_enemy (GameState *game, Point *shape_template, int point_count,
+                  float x, float y, float speed) {
+    Enemy *enemy = NULL;
+    for (int i = 0;i < game->enemy_count;i ++) {
+        if (!game->enemies[i].active) {
+            enemy = &game->enemies[i];
+            break;
+        }
+    }
+
+    if (enemy == NULL && game->enemy_count < 10) {
+        enemy = &game->enemies[game->enemy_count];
+        game->enemy_count ++;
+    }
+
+    if (enemy == NULL) {
+        return;
+    }
+
+    //init enemy
+    enemy->x = x;
+    enemy->y = y;
+    enemy->dx = 0.0f;
+    enemy->dy = 0.0f;
+    enemy->shape_template = shape_template;
+    enemy->point_count = point_count;
+    enemy->angle = 0.0f;
+    enemy->speed = speed;
+    enemy->active = true;
+
+    enemy->bounds = calculate_shape_bounds(shape_template, point_count);
+
+    for (int i = 0;i < point_count;i ++) {
+        enemy->rotated_points[i] = shape_template[i];
+    }
+}
+
+
+void update_enemy_ai (Enemy *enemy, GameObject *player) {
+    float to_player_x = player->transform.x - enemy->x;
+    float to_player_y = player->transform.y - enemy->y;
+
+    float distance = sqrt(to_player_x * to_player_x + to_player_y * to_player_y);
+    if (distance < 1.0f) {
+        enemy->dx = 0.0f;
+        enemy->dy = 0.0f;
+        return;
+    }
+
+    //normalize
+    enemy->dx = (to_player_x / distance) *enemy->speed;
+    enemy->dy = (to_player_y / distance) *enemy->speed;
+
+    enemy->angle = atan2(enemy->dy, enemy->dx);
+
+}
+
+void update_enemies (GameState *game) {
+    GameObject *player = &game->objects[0];
+
+    for (int i = 0;i < game->enemy_count;i ++) {
+        Enemy *enemy = &game->enemies[i];
+    
+        if(!enemy->active) {
+            continue;
+        }
+
+        update_enemy_ai(enemy, player);
+
+        enemy->x += enemy->dx;
+        enemy->y += enemy->dy;
+        
+        float angle = enemy->angle;
+        for (int j = 0;j < enemy->point_count;j ++) {
+            float x = enemy->shape_template[j].x;
+            float y = enemy->shape_template[j].x;
+
+            enemy->rotated_points[j].x = (int)(x * cos(angle) - y * sin(angle));
+            enemy->rotated_points[j].y = (int)(x * sin(angle) + y * cos(angle));
+        }
+    }
+}
