@@ -59,6 +59,15 @@ typedef struct CollisionShape {
     float max_radius;
 } CollisionShape;
 
+typedef struct CollectiblePoint {
+    float x, y;
+    int shape_point_index;
+    bool active;
+    //float drift angle;
+    //float drift speed;
+} CollectiblePoint;
+
+
 typedef struct GameObject {
     Transform transform;
     VisualShape shape;
@@ -75,14 +84,8 @@ typedef struct GameObject {
 
     bool point_collected[100];
     int total_collected_count;
-} GameObject;
 
-typedef struct CollectiblePoint {
-    float x, y;
-    float dx, dy;
-    int shape_index;
-    bool active;
-} CollectiblePoint;
+} GameObject;
 
 typedef struct GameState {
     GameObject objects[MAX_OBJECTS];
@@ -91,6 +94,9 @@ typedef struct GameState {
     int max_x;
     int max_y;
     unsigned int frame;
+
+    CollectiblePoint collectibles[50];
+    int collectible_count;
 } GameState;
 
 typedef struct KeyState {

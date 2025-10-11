@@ -174,3 +174,28 @@ void render_char(char ch, int x, int y) {
     putchar(ch);
     fflush(stdout);
 }
+
+void render_collectibles (CollectiblePoint * collectibles, int count, unsigned int frame) {   
+    
+    const char anim_chars[] = {'!', '?', '.', '+'};
+    const int anim_chars_count = 4;
+
+    for (int i  = 0;i < count;i ++) {
+        CollectiblePoint *cp = &collectibles[i];
+
+        if(!cp->active) {
+            continue;
+        }
+
+        //TODO apply drift
+        int animation_phase = (frame + i * 7) / 10;
+        int char_index = animation_phase % anim_chars_count;
+        char ch = anim_chars[char_index];
+
+        float render_x = cp->x;
+        float render_y = cp->y;
+        printf("\033[%d;%dH", (int)render_y, (int)render_x);
+        printf("%c",ch);
+    }
+    fflush(stdout);
+}

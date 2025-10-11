@@ -8,6 +8,6 @@ void setup_morph_forms (GameObject *obj, Point *form_a, int count_a,
 
 void  initiate_morph (GameObject *obj);
 
-bool update_morph (GameObject *obj, unsigned int frame);
+bool update_morph (GameObject *obj, GameState *game, unsigned int frame);
 
 #endif

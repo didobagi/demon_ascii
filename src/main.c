@@ -34,7 +34,7 @@ void initialise_game (GameState *game) {
     for (int row = 0;row < SECTOR_ROWS; row++) {
         for (int col= 0;col < SECTOR_COLS;col++) {
             int random_val = rand() % 100;
-            if (random_val < 30) {
+            if (random_val < 0) {
                 game->sectors[row][col].is_dangerous = true;
             } else {
                 game->sectors[row][col].is_dangerous = false;
@@ -116,6 +116,7 @@ static void handle_input(GameState *game) {
 
 void render_game(GameState *game) {
     render_background(game->max_x, game->max_y, game->frame, game->sectors);
+    render_collectibles(game->collectibles, game->collectible_count, game->frame);
 
     for (int i = 0;i < game->object_count;i ++) {
         if(game->objects[i].active) {
@@ -169,9 +170,9 @@ int main () {
 
     while (1) {
         game.frame++;
-        update_sectors(&game);
+        //update_sectors(&game);
         handle_input(&game);
-        update_morph(&game.objects[0], game.frame);
+        update_morph(&game.objects[0],&game, game.frame);
         bounce(&game.objects[0], game.max_x, game.max_y); 
         render_game(&game);
         //update_transform(&objects[0], max_x, max_y);

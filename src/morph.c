@@ -2,6 +2,7 @@
 #include "../include/game.h"
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define MORPH_DURATION_FRAMES 30
 
@@ -77,7 +78,29 @@ void initiate_morph(GameObject *obj) {
     morph_in_progress = true;
 }
 
-bool update_morph(GameObject *obj, unsigned int frame) {
+static void spawn_collectible_for_morph (GameObject *obj, GameState *game,
+                                         int screen_w, int screen_h) {
+    game->collectible_count =0;
+    int collectible_index = 0;
+    for (int shape_index = CORE_SNAKE_POINTS;shape_index < obj->snake_form_point_count;shape_index ++) {
+        CollectiblePoint *cp = &game->collectibles[collectible_index];
+
+        int margin = 5; //leave so not right on the screen
+
+        cp->x = margin + ((float)rand() / RAND_MAX) * (screen_w - 2 * margin);
+        cp->y = margin + ((float)rand() / RAND_MAX) * (screen_h - 2 * margin);
+
+        cp->shape_point_index = shape_index;
+        cp->active = true;
+
+        //TODO drift
+
+        collectible_index ++;
+    }
+    game->collectible_count = collectible_index;
+}
+
+bool update_morph(GameObject *obj, GameState *game, unsigned int frame) {
     if (!obj->is_morphing) {
         return false;
     }
@@ -111,12 +134,13 @@ bool update_morph(GameObject *obj, unsigned int frame) {
 
         if (obj->in_snake_form) {
             obj->shape.original_points = obj->snake_form_template;
-            obj->shape.point_count = obj->snake_form_point_count;
+            spawn_collectible_for_morph(obj,game, game->max_x, game->max_y);
         } else {
             obj->shape.original_points = obj->demon_form_template;
-            obj->shape.point_count = obj->demon_form_point_count;
         }
         return false;
     }
     return true;
 }
+
+
