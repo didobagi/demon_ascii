@@ -1,5 +1,4 @@
 #include "../include/render.h"
-#include "../include/frame_buffer.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -97,17 +96,21 @@ char get_sector_fire_char (int x, int y, float y_ratio, unsigned int frame) {
     return 'B';
 }
 
-void render_background(FrameBuffer *fb, int max_x, int max_y, unsigned int frame,
+void render_background(int max_x, int max_y, unsigned int frame,
         Sector sectors[SECTOR_ROWS][SECTOR_COLS]) {
     int sector_w = max_x / SECTOR_COLS;
     int sector_h = max_y / SECTOR_ROWS;
 
+    static char buffer[100000];
+    int pos = 0;
+
     int current_sector_x = -1;
     int current_sector_y = -1;
     bool current_is_dangerous = false;
-    Color current_color = COLOR_BRIGHT_BLACK;
 
     for (int y = 1; y <= max_y; y++) {
+        pos += sprintf(buffer + pos, "\033[%d;1H", y); 
+
         for (int x = 1; x <= max_x; x++) {
             int sector_x = (x - 1) / sector_w;
             int sector_y = (y - 1) / sector_h;
@@ -120,8 +123,13 @@ void render_background(FrameBuffer *fb, int max_x, int max_y, unsigned int frame
                 current_sector_y = sector_y;
                 current_is_dangerous = sectors[sector_y][sector_x].is_dangerous;
 
-                current_color = current_is_dangerous ? COLOR_BRIGHT_RED : COLOR_BRIGHT_BLACK;
-            }   
+                if (current_is_dangerous) {
+                    pos += sprintf(buffer + pos, "%s", COLOR_CODES[COLOR_BRIGHT_RED]);
+                } else {
+                    pos += sprintf(buffer + pos, "%s", COLOR_CODES[COLOR_BRIGHT_BLACK]);
+                }
+            }
+
             char ch;
             if (current_is_dangerous) {
                 int sector_start_y = sector_y * sector_h + 1;
@@ -131,14 +139,22 @@ void render_background(FrameBuffer *fb, int max_x, int max_y, unsigned int frame
             } else {
                 ch = 'A';
             }
-            buffer_draw_char(fb, x, y, ch, current_color);
+            buffer[pos++] = ch;
         }
     }
+    pos += sprintf(buffer + pos, "\033[0m");
+
+    printf("%s", buffer);
+    fflush(stdout);
 }
 
+void render (GameObject *obj, float center_x, float center_y, bool erase, unsigned int frame) {
+    char buffer[2000];
+    int pos = 0;
 
-void render (FrameBuffer *fb, GameObject *obj, float center_x, float center_y,
-             bool erase, unsigned int frame) {
+    if (!erase) {
+        pos += sprintf(buffer + pos, "%s", COLOR_CODES[obj->color]);
+    }
 
     for (int i = 0;i < obj->shape.point_count;i ++) {
 
@@ -172,9 +188,14 @@ void render (FrameBuffer *fb, GameObject *obj, float center_x, float center_y,
                     ch = '*';
             }
         }
-        Color draw_color = erase ? COLOR_BLACK : obj->color;
-        buffer_draw_char(fb, draw_x, draw_y, ch, draw_color);
+        pos += sprintf(buffer + pos, "\033[%d;%dH", draw_y, draw_x);
+        pos += sprintf(buffer + pos, "%c",ch);
     }
+    if (!erase) {
+        pos += sprintf(buffer + pos, "\033[0m");
+    }
+    printf("%s", buffer);
+    fflush(stdout);
 }
 
 void render_text(const char *text, int x, int y) {
@@ -203,8 +224,7 @@ void render_char(char ch, int x, int y) {
     fflush(stdout);
 }
 
-void render_collectibles (FrameBuffer *fb, CollectiblePoint * collectibles,
-                          int count, unsigned int frame) {   
+void render_collectibles (CollectiblePoint * collectibles, int count, unsigned int frame) {   
     
     const char anim_chars[] = {'!', '?', '.', '+'};
     const int anim_chars_count = 4;
@@ -223,13 +243,13 @@ void render_collectibles (FrameBuffer *fb, CollectiblePoint * collectibles,
 
         float render_x = cp->x;
         float render_y = cp->y;
-        
-        buffer_draw_char(fb, (int)render_x, (int)render_y, ch, COLOR_BRIGHT_YELLOW);
+        printf("\033[%d;%dH", (int)render_y, (int)render_x);
+        printf("%c",ch);
     }
+    fflush(stdout);
 }
 
-void render_enemies (FrameBuffer *fb, Enemy *enemies, int count,
-                     int screen_w, int screen_h, unsigned int frame) {
+void render_enemies (Enemy *enemies, int count, int screen_w, int screen_h, unsigned int frame) {
     for (int i = 0;i < count;i ++) {
         Enemy *enemy = &enemies[i];
 
@@ -244,7 +264,8 @@ void render_enemies (FrameBuffer *fb, Enemy *enemies, int count,
             if (draw_x < 1 || draw_x >= screen_w || draw_y < 1 || draw_y >= screen_h) {
                 continue;
             }
-            buffer_draw_char(fb, draw_x, draw_y, '@', COLOR_CYAN);
+            printf("\033[%d;%dH\033[36m@\033[0m", draw_y, draw_x);
         }
     }
+    fflush(stdout);
 }
