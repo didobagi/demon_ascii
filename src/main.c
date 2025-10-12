@@ -23,6 +23,11 @@ void init (int *width, int *height) {
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     *height = w.ws_row;
     *width = w.ws_col;
+    FILE *debug_log = fopen("game_debug.log", "a");
+    if (debug_log) {
+        fprintf(debug_log, "Terminal size at init: %d cols x %d rows\n", *width, *height);
+        fclose(debug_log);
+    }
     printf("\033[?1049h");
     printf("\033[2J");
     printf("\033[?25l"); 
@@ -120,24 +125,28 @@ static void handle_input(GameState *game) {
     }
 }
 
-void render_game(GameState *game) {
-    render_background(game->max_x, game->max_y, game->frame, game->sectors);
-    render_collectibles(game->collectibles, game->collectible_count, game->frame);
-    render_enemies(game->enemies, game->enemy_count,game->max_x,game->max_y, game->frame);   
+void render_game(GameState *game, FrameBuffer *fb) {
+    init_frame_buffer(fb, game->max_x, game->max_y);
+    render_background(fb, game->max_x, game->max_y, game->frame, game->sectors);
+    render_collectibles(fb, game->collectibles, game->collectible_count, game->frame);
+    render_enemies(fb, game->enemies, game->enemy_count,game->max_x,game->max_y, game->frame);   
 
     for (int i = 0;i < game->object_count;i ++) {
         if(game->objects[i].active) {
-            render(&game->objects[i], game->objects[i].transform.x,
+            render(fb, &game->objects[i], game->objects[i].transform.x,
                     game->objects[i].transform.y,false, game->frame);
         }
     }
     if (game->objects[0].in_snake_form) {
-        printf("\033[1;1H");
-        printf("Points Collected: %d OF %d",
+        char score_text[100];
+        sprintf(score_text, "POINTS COLLECTED %d OF %d",
                 game->objects[0].total_collected_count,
                 game->objects[0].snake_form_point_count);
-        fflush(stdout);
+        for (int i = 0;score_text[i] != '\0';i ++) {
+            buffer_draw_char(fb, 1 + i, 1, score_text[i], COLOR_BRIGHT_WHITE);
+        }
     }
+    present_frame(fb);
 }
 
 static void show_splash_scr (int term_w, int term_h) {
@@ -177,10 +186,11 @@ int main () {
     int term_width = w.ws_col;
     int term_height = w.ws_row;
 
-    //show_splash_screen(term_width, term_height);
+    show_splash_screen(term_width, term_height);
 
     GameState game;
     initialise_game(&game);
+    FrameBuffer frame_buffer;
 
     while (1) {
         game.frame++;
@@ -194,7 +204,7 @@ int main () {
             check_collectible_collision(&game.objects[0], &game);
         }
         bounce(&game.objects[0], game.max_x, game.max_y); 
-        render_game(&game);
+        render_game(&game, &frame_buffer);
         //update_transform(&objects[0], max_x, max_y);
         //bool hit_b = check_boundaries(&objects[0], max_x, max_y);
         //commit_transf(&objects[0]);
