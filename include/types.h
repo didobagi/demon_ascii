@@ -48,6 +48,21 @@ typedef enum {
     //AI_STATE_DEAD,
 } AIState;
 
+typedef enum {
+    TERRAIN_FLOOR,
+    TERRAIN_WALL,
+    TERRAIN_OPTIONAL_WALL,
+    TERRAIN_FIRE,
+    TERRAIN_WATER,
+    TERRAIN_GRASS,
+} TerrainType;
+
+typedef enum {
+    ENTITY_PLAYER,
+    ENTITY_ENEMY,
+    ENTITY_COLLECTIBLE,
+} EntityType;
+
 typedef struct Point {
     int x;
     int y;
@@ -60,14 +75,14 @@ typedef struct Transform {
     float dx, dy;
 } Transform;
 
-typedef struct VisualShape {
+typedef struct Shape {
     Point *original_points;
     Point *rotated_points;
     float *distances;
     int point_count;
     char display_char;
     TextureType texture;
-} VisualShape;
+} Shape;
 
 typedef struct ShapeBounds {
     float min_x, max_x;
@@ -94,14 +109,26 @@ typedef struct CollectiblePoint {
     //float drift speed;
 } CollectiblePoint;
 
+typedef struct CollisionData{
+    bool in_world;
+} CollisionData;
 
 typedef struct GameObject {
-    Transform transform;
-    VisualShape shape;
-    CollisionShape collision;
-    ShapeBounds bounds;
+    EntityType entity_type;
     bool active;
+    int cell_x, cell_y;
+    float v_x, v_y;
+    float target_v_x, target_v_y;
+
+    Transform transform;
+    Shape shape;
+    ShapeBounds bounds;
     Color color;
+    CollisionData collision;
+
+    AIState current_state;
+    unsigned int state_entered_frame;
+    float speed;
 
     Point *demon_form_template;
     int demon_form_point_count;
@@ -109,14 +136,34 @@ typedef struct GameObject {
     int snake_form_point_count;
     bool is_morphing;
     bool in_snake_form;
-
     bool point_collected[100];
     int total_collected_count;
 
-    int  health;
-    int  max_health;
-    unsigned int last_damage_frame;
+    //int  health;
+    //int  max_health;
+    //unsigned int last_damage_frame;
 } GameObject;
+
+typedef struct {
+    TerrainType terrain;
+    GameObject **entities;  //din array of entity pointers
+    int entity_count;
+    int entity_capacity;
+
+} Cell;
+
+typedef struct {
+    int width;
+    int height;
+    Cell *grid;
+} World;
+
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+} Camera;
 
 typedef struct Enemy{
     float x, y;
@@ -136,6 +183,7 @@ typedef struct Enemy{
 } Enemy;
 
 typedef struct GameState {
+    World *world;
     GameObject objects[MAX_OBJECTS];
     int object_count;
     Sector sectors[SECTOR_ROWS][SECTOR_COLS];
@@ -146,7 +194,6 @@ typedef struct GameState {
     CollectiblePoint collectibles[50];
     int collectible_count;
 
-    Enemy enemies[10];
     int enemy_count;
 } GameState;
 

@@ -337,23 +337,35 @@ void check_enemy_state_transitions (Enemy *enemy, GameObject *player, unsigned i
 
     switch (enemy->current_state) {
         case AI_STATE_IDLE:
-            if (frame - enemy->state_entered_frame > IDLE_DUR_BEFORE_WAND) {
+            if (distance_to_player < DETECTION_RANGE) {
+                if  (player->in_snake_form) {
+                    change_enemy_state (enemy, AI_STATE_ALERT, frame);
+                } else {
+                    change_enemy_state(enemy, AI_STATE_FLEE, frame);
+                }
+            }
+            else if (frame - enemy->state_entered_frame > IDLE_DUR_BEFORE_WAND) {
                 change_enemy_state(enemy, AI_STATE_WANDER, frame);
             }
-            if (distance_to_player < DETECTION_RANGE) {
-                change_enemy_state (enemy, AI_STATE_ALERT, frame);
-            }
+
             break;
         case AI_STATE_ALERT:
             if (frame - enemy->state_entered_frame > ALERT_DURATION) {
-                change_enemy_state (enemy,AI_STATE_PURSUE, frame);
+                if (player->in_snake_form) {
+                    change_enemy_state (enemy,AI_STATE_PURSUE, frame);
+                } else {
+                    change_enemy_state(enemy, AI_STATE_FLEE, frame);
+                }
             }
-
             if (distance_to_player > DETECTION_RANGE * 1.5) {
                 change_enemy_state (enemy, AI_STATE_IDLE, frame);
             }
             break;
         case AI_STATE_PURSUE:
+            if (!player->in_snake_form) {
+                change_enemy_state(enemy, AI_STATE_FLEE, frame);
+            }
+
             if (enemy->health < enemy->max_health * 0.3) {
                 change_enemy_state (enemy, AI_STATE_FLEE, frame);
             }
@@ -362,15 +374,22 @@ void check_enemy_state_transitions (Enemy *enemy, GameObject *player, unsigned i
             }
             break;
         case AI_STATE_FLEE:
-            if (enemy->health >  enemy->max_health * 0.5) {
-                change_enemy_state (enemy, AI_STATE_PURSUE, frame);
+            if (player->in_snake_form) {
+                change_enemy_state(enemy, AI_STATE_PURSUE, frame);
             }
+            //if (enemy->health >  enemy->max_health * 0.5) {
+            //    change_enemy_state (enemy, AI_STATE_PURSUE, frame);
+            //}
             break;
         case AI_STATE_WANDER:
             if (distance_to_player < DETECTION_RANGE) {
-                change_enemy_state(enemy, AI_STATE_ALERT, frame);
-                break;
+                if (player->in_snake_form) {
+                    change_enemy_state(enemy, AI_STATE_ALERT, frame);
+                } else {
+                    change_enemy_state(enemy, AI_STATE_FLEE, frame);
+                }
             }
+            break;
     }
 }
 
