@@ -60,8 +60,8 @@ char get_fire_char (int  point_index, float distance, unsigned int frame, float 
     }
     float transtion = (point_y - fire_tresh)/(solid_tresh - fire_tresh);
     int phase = (point_index * 7 + (int)(distance * 3)) % 20;
-    int cycle_lengt = 40 + (int)(transtion*60);
-    int cycle = (frame + phase) % 40;
+    int cycle_length = 40 + (int)(transtion*60);
+    int cycle = (frame + phase) % cycle_length;
 
     int brigth_du = (int)(10 * (1.0 - transtion));
     if (cycle < brigth_du) return '#';

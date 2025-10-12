@@ -194,7 +194,7 @@ int main () {
 
     while (1) {
         game.frame++;
-        //update_sectors(&game);
+        update_sectors(&game);
         handle_input(&game);
         update_morph(&game.objects[0],&game, game.frame);
         
