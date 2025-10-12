@@ -39,6 +39,14 @@ typedef enum {
     TEXTURE_SPEED,
 } TextureType;
 
+typedef enum {
+    AI_STATE_IDLE,
+    AI_STATE_ALERT,
+    AI_STATE_PURSUE,
+    AI_STATE_FLEE,
+    AI_STATE_DEAD,
+} AIState;
+
 typedef struct Point {
     int x;
     int y;
@@ -119,6 +127,9 @@ typedef struct Enemy{
     ShapeBounds bounds;
     float speed;
     bool active;
+
+    AIState current_state;
+    unsigned int state_entered_frame;
 } Enemy;
 
 typedef struct GameState {
