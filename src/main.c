@@ -24,10 +24,10 @@ void init (int *width, int *height) {
     *height = w.ws_row;
     *width = w.ws_col;
     FILE *debug_log = fopen("game_debug.log", "a");
-    if (debug_log) {
-        fprintf(debug_log, "Terminal size at init: %d cols x %d rows\n", *width, *height);
-        fclose(debug_log);
-    }
+    //if (debug_log) {
+    //    fprintf(debug_log, "Terminal size at init: %d cols x %d rows\n", *width, *height);
+    //    fclose(debug_log);
+    //}
     printf("\033[?1049h");
     printf("\033[2J");
     printf("\033[?25l"); 
@@ -62,7 +62,7 @@ void initialise_game (GameState *game) {
                       demon_snake_template, 50);
 
     spawn_enemy(game, ghost_template, ghost_point_count,
-            game->max_x / 2, game->max_y / 2, 0.5f);
+            game->max_x / 2, game->max_y / 2, 0.3f);
 
     game->frame = 0;
 }
@@ -186,7 +186,7 @@ int main () {
     int term_width = w.ws_col;
     int term_height = w.ws_row;
 
-    show_splash_screen(term_width, term_height);
+    //show_splash_screen(term_width, term_height);
 
     GameState game;
     initialise_game(&game);
@@ -194,7 +194,7 @@ int main () {
 
     while (1) {
         game.frame++;
-        update_sectors(&game);
+        //update_sectors(&game);
         handle_input(&game);
         update_morph(&game.objects[0],&game, game.frame);
         

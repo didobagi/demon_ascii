@@ -44,7 +44,8 @@ typedef enum {
     AI_STATE_ALERT,
     AI_STATE_PURSUE,
     AI_STATE_FLEE,
-    AI_STATE_DEAD,
+    AI_STATE_WANDER,
+    //AI_STATE_DEAD,
 } AIState;
 
 typedef struct Point {
@@ -130,6 +131,8 @@ typedef struct Enemy{
 
     AIState current_state;
     unsigned int state_entered_frame;
+    int health;
+    int max_health;
 } Enemy;
 
 typedef struct GameState {

@@ -3,6 +3,22 @@
 #include <math.h>
 #include <stdlib.h>
 
+#define DETECTION_RANGE 30.0f
+#define DEACTIVATION_RANGE 50.0f
+#define ALERT_DURATION 60
+#define IDLE_DUR_BEFORE_WAND 79
+
+float calculate_distance (Enemy *enemy, GameObject *player) {
+    float dx = player->transform.x - enemy->x;
+    float dy = player->transform.y - enemy->y;
+    return sqrt(dx*dx + dy*dy);
+}
+
+void change_enemy_state (Enemy *enemy, AIState new_state, unsigned int frame) {
+    enemy->current_state = new_state;
+    enemy->state_entered_frame = frame;
+}
+
 void update_transform (GameObject *obj, int max_x, int max_y) {
     int min = 4;
     int max = 7;
@@ -255,6 +271,11 @@ void spawn_enemy (GameState *game, Point *shape_template, int point_count,
     enemy->speed = speed;
     enemy->active = true;
 
+    enemy->current_state = AI_STATE_IDLE;
+    enemy->state_entered_frame = 0;
+    enemy->health = 100;
+    enemy->max_health = 100;
+
     enemy->bounds = calculate_shape_bounds(shape_template, point_count);
 
     for (int i = 0;i < point_count;i ++) {
@@ -262,8 +283,7 @@ void spawn_enemy (GameState *game, Point *shape_template, int point_count,
     }
 }
 
-
-void update_enemy_ai (Enemy *enemy, GameObject *player) {
+void enemy_seek (Enemy *enemy, GameObject *player) {
     float to_player_x = player->transform.x - enemy->x;
     float to_player_y = player->transform.y - enemy->y;
 
@@ -273,14 +293,115 @@ void update_enemy_ai (Enemy *enemy, GameObject *player) {
         enemy->dy = 0.0f;
         return;
     }
-
     //normalize
     enemy->dx = (to_player_x / distance) *enemy->speed;
     enemy->dy = (to_player_y / distance) *enemy->speed;
 
     enemy->angle = atan2(enemy->dy, enemy->dx);
-
 }
+
+void enemy_flee (Enemy *enemy, GameObject *player) {
+    float away_from_player_x =  enemy->x - player->transform.x;
+    float away_from_player_y =  enemy->y - player->transform.y;
+
+    float distance = sqrt(away_from_player_x * away_from_player_x + 
+                          away_from_player_y * away_from_player_y);
+    if (distance < 1.0f) {
+        enemy->dx = enemy->speed;
+        enemy->dy = 0.0f;
+        return;
+    }
+    //normalize
+    enemy->dx = (away_from_player_x / distance) *enemy->speed;
+    enemy->dy = (away_from_player_y / distance) *enemy->speed;
+
+    enemy->angle = atan2(enemy->dy, enemy->dx);
+}
+
+void enemy_idle (Enemy *enemy) {
+    enemy->dx = 0;
+    enemy->dy = 0;
+}
+
+void enemy_wonder (Enemy *enemy, unsigned int frame) {
+    if (frame % 60 == 0) {
+        float random_angle = ((float)rand() / RAND_MAX) * 2.0f * 3.14159f;
+        enemy->dx = cos(random_angle) * enemy->speed * 0.6f;
+        enemy->dy = sin(random_angle) * enemy->speed * 0.6f;
+        enemy->angle = random_angle;
+    }
+}
+
+void check_enemy_state_transitions (Enemy *enemy, GameObject *player, unsigned int frame) {
+    float distance_to_player = calculate_distance (enemy, player);
+
+    switch (enemy->current_state) {
+        case AI_STATE_IDLE:
+            if (frame - enemy->state_entered_frame > IDLE_DUR_BEFORE_WAND) {
+                change_enemy_state(enemy, AI_STATE_WANDER, frame);
+            }
+            if (distance_to_player < DETECTION_RANGE) {
+                change_enemy_state (enemy, AI_STATE_ALERT, frame);
+            }
+            break;
+        case AI_STATE_ALERT:
+            if (frame - enemy->state_entered_frame > ALERT_DURATION) {
+                change_enemy_state (enemy,AI_STATE_PURSUE, frame);
+            }
+
+            if (distance_to_player > DETECTION_RANGE * 1.5) {
+                change_enemy_state (enemy, AI_STATE_IDLE, frame);
+            }
+            break;
+        case AI_STATE_PURSUE:
+            if (enemy->health < enemy->max_health * 0.3) {
+                change_enemy_state (enemy, AI_STATE_FLEE, frame);
+            }
+            if (distance_to_player > DEACTIVATION_RANGE) {
+                change_enemy_state (enemy, AI_STATE_IDLE, frame);
+            }
+            break;
+        case AI_STATE_FLEE:
+            if (enemy->health >  enemy->max_health * 0.5) {
+                change_enemy_state (enemy, AI_STATE_PURSUE, frame);
+            }
+            break;
+        case AI_STATE_WANDER:
+            if (distance_to_player < DETECTION_RANGE) {
+                change_enemy_state(enemy, AI_STATE_ALERT, frame);
+                break;
+            }
+    }
+}
+
+void execute_enemy_state_behaviour (Enemy *enemy, GameObject *player, unsigned int frame) {
+    switch (enemy->current_state) {
+        case AI_STATE_IDLE:
+            enemy_idle(enemy);
+            break;
+        case AI_STATE_ALERT:
+            enemy_idle(enemy);
+            break;
+        case AI_STATE_PURSUE:
+            enemy_seek(enemy, player);
+            break;
+        case AI_STATE_FLEE:
+            enemy_flee (enemy, player);
+            break;
+        case AI_STATE_WANDER:
+            enemy_wonder(enemy, frame);
+            break;
+    }
+    enemy->x += enemy->dx;
+    enemy->y += enemy->dy;
+}
+void update_enemy (Enemy *enemy, GameObject *player, unsigned int frame) {
+    check_enemy_state_transitions (enemy, player, frame);
+
+    execute_enemy_state_behaviour (enemy, player, frame);
+}
+
+
 
 void update_enemies (GameState *game) {
     GameObject *player = &game->objects[0];
@@ -292,15 +413,12 @@ void update_enemies (GameState *game) {
             continue;
         }
 
-        update_enemy_ai(enemy, player);
-
-        enemy->x += enemy->dx;
-        enemy->y += enemy->dy;
+        update_enemy(enemy, player, game->frame);
         
         float angle = enemy->angle;
         for (int j = 0;j < enemy->point_count;j ++) {
             float x = enemy->shape_template[j].x;
-            float y = enemy->shape_template[j].x;
+            float y = enemy->shape_template[j].y;
 
             enemy->rotated_points[j].x = (int)(x * cos(angle) - y * sin(angle));
             enemy->rotated_points[j].y = (int)(x * sin(angle) + y * cos(angle));
