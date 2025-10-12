@@ -1,3 +1,4 @@
 build/
 *.log
 main
+test_templates
