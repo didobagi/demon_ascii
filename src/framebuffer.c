@@ -23,30 +23,48 @@ void buffer_draw_char(FrameBuffer *fb, int x, int y, char c, Color color) {
 }
 
 void present_frame(FrameBuffer *fb) {
-    static char output_buffer[4000000];
+    static char output_buffer[400000];
     int pos = 0;
+    Color current_color = -1;
 
-    Color current_color = COLOR_BLACK;
-
-        static const char* COLOR_CODES[] = {
+    static const char* COLOR_CODES[] = {
         "\033[30m", "\033[31m", "\033[32m", "\033[33m",
         "\033[34m", "\033[35m", "\033[36m", "\033[37m",
         "\033[90m", "\033[91m", "\033[92m", "\033[93m",
         "\033[94m", "\033[95m", "\033[96m", "\033[97m"
     };
 
-    for (int y = 0; y < fb->height;y ++) {
-        pos += sprintf(output_buffer + pos, "\033[%d;1H", y + 1);
-        for (int x = 0; x < fb->width;x ++) {
-            Color cell_color = fb->colors[y][x];
-
-            if (cell_color != current_color) {
-               pos += sprintf(output_buffer + pos,"%s", COLOR_CODES[cell_color]);
-               current_color = cell_color;
+    for (int y = 0; y < fb->height; y++) {
+        int run_start = -1;
+        
+        for (int x = 0; x <= fb->width; x++) {              bool changed = (x < fb->width) && 
+                          (fb->cells[y][x] != fb->prev_cells[y][x] || 
+                           fb->colors[y][x] != fb->prev_colors[y][x]);
+            
+            if (changed) {
+                if (run_start == -1) {
+                    run_start = x;
+                    pos += sprintf(output_buffer + pos, "\033[%d;%dH", y + 1, x + 1);
+                }
+                
+                Color cell_color = fb->colors[y][x];
+                if (cell_color != current_color) {
+                    pos += sprintf(output_buffer + pos, "%s", COLOR_CODES[cell_color]);
+                    current_color = cell_color;
+                }
+                output_buffer[pos++] = fb->cells[y][x];
+                
+                fb->prev_cells[y][x] = fb->cells[y][x];
+                fb->prev_colors[y][x] = fb->colors[y][x];
+                
+            } else if (run_start != -1) {
+                run_start = -1;
             }
-            output_buffer[pos++] = fb->cells[y][x];
         }
     }
-    pos += sprintf(output_buffer + pos, "\033[0m");
-    write(STDOUT_FILENO, output_buffer, pos);
+    
+    if (pos > 0) {
+        pos += sprintf(output_buffer + pos, "\033[0m");
+        write(STDOUT_FILENO, output_buffer, pos);
+    }
 }

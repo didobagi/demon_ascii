@@ -16,8 +16,12 @@
 #include "../include/map_template.h"
 #include "../include/map_builder.h"
 #include "../include/shapes.h"
+#include "../include/movement.h"
+
+#define FRAME_TIME 0.016f
 
 FILE *debug_log = NULL;
+static bool moved_this_frame = false;
 
 void init_term(int *width, int *height) {
     usleep(50000);
@@ -32,29 +36,21 @@ void init_term(int *width, int *height) {
 
 
 void handle_player_command(World *world, GameObject *player, PlayerCommand cmd) {
-    if (cmd == CMD_NONE) return;
-
-    int target_x = player->cell_x;
-    int target_y = player->cell_y;
-
+    extern bool moved_this_frame;     
+    if (cmd == CMD_NONE || moved_this_frame) return;
+    
+    int dx = 0, dy = 0;
+    
     switch (cmd) {
-        case CMD_MOVE_UP:    target_y--; break;
-        case CMD_MOVE_DOWN:  target_y++; break;
-        case CMD_MOVE_LEFT:  target_x--; break;
-        case CMD_MOVE_RIGHT: target_x++; break;
+        case CMD_MOVE_UP:    dy = -1; break;
+        case CMD_MOVE_DOWN:  dy = 1; break;
+        case CMD_MOVE_LEFT:  dx = -1; break;
+        case CMD_MOVE_RIGHT: dx = 1; break;
         default: return;
     }
-
-    if (world_is_walkable(world, target_x, target_y)) {
-        world_remove_entity(world, player->cell_x, player->cell_y, player);
-
-        player->cell_x = target_x;
-        player->cell_y = target_y;
-
-        player->v_x = (float)target_x;
-        player->v_y = (float)target_y;
-
-        world_add_entity(world, player->cell_x, player->cell_y, player);
+    
+    if (movement_try_mov(player, world, dx, dy)) {
+        moved_this_frame = true;
     }
 }
 
@@ -72,8 +68,8 @@ int main() {
     enable_raw_mode();
     atexit(disable_raw_mode);
 
-    const int WORLD_WIDTH = 1000;
-    const int WORLD_HEIGHT = 1000;
+    const int WORLD_WIDTH = 400;
+    const int WORLD_HEIGHT = 400;
 
     World *world = create_world(WORLD_WIDTH, WORLD_HEIGHT);
     if (!world) {
@@ -133,26 +129,29 @@ int main() {
     }
 
     world_add_entity(world, player.cell_x, player.cell_y, &player);
+    movement_init_entity(&player);
 
     Camera camera;
     camera_init(&camera, term_width, term_height);
-    camera_follow_entity(&camera, &player, WORLD_WIDTH, WORLD_HEIGHT);
 
     FrameBuffer fb;
     unsigned int frame = 0;
 
     while (1) {
         frame++;
+        moved_this_frame = false;
+
         PlayerCommand cmd = read_player_command();
         if (cmd == CMD_QUIT) {
             break;
         }
 
         handle_player_command(world, &player, cmd);
-        camera_follow_entity(&camera, &player, WORLD_WIDTH, WORLD_HEIGHT);
+        movement_update(&player, FRAME_TIME);
+        camera_follow_entity_smooth(&camera, &player, WORLD_WIDTH, WORLD_HEIGHT);
         render_world(&fb, world, &camera, frame);
 
-        usleep(33000);
+        usleep(16000);
     }
 
 

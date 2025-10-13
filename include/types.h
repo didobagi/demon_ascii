@@ -119,6 +119,10 @@ typedef struct GameObject {
     int cell_x, cell_y;
     float v_x, v_y;
     float target_v_x, target_v_y;
+    bool is_moving;
+    float move_speed;
+    float move_start_x, move_start_y;
+    float move_time;
 
     Transform transform;
     Shape shape;
@@ -159,6 +163,7 @@ typedef struct {
 } World;
 
 typedef struct {
+    float x_float, y_float;
     int x;
     int y;
     int width;

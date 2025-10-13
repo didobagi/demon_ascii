@@ -4,6 +4,7 @@
 #include "../include/camera.h"
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 char get_char_for_distance (float distance) {
     if (distance < 2.0) return '*';
@@ -11,8 +12,12 @@ char get_char_for_distance (float distance) {
     if (distance < 6.0) return '=';
     return '-';
 }
+
 void get_check (int world_x, int world_y, int sqr_size, char *ch, Color *color) {
-    if ((world_x / sqr_size +  world_y / sqr_size) % 2 == 0) {
+    float ang = 44.0f * M_PI / 180.0f;
+    int rot_x = (int)(world_x * cos(ang) - world_y * sin(ang));
+    int rot_y = (int)(world_x * sin(ang) + world_y * cos(ang));
+    if ((rot_x / sqr_size - (rot_y) / sqr_size) % 2 == 0) {
         *ch = 'W';
         *color = COLOR_BRIGHT_BLACK;
     } else {
@@ -20,6 +25,7 @@ void get_check (int world_x, int world_y, int sqr_size, char *ch, Color *color) 
         *color = COLOR_BRIGHT_BLACK;
     }
 }
+
 char get_fire_char (int  point_index, float distance, unsigned int frame, float point_y) {
     float solid_tresh = 4.0;
     float fire_tresh = -2.0;
@@ -57,8 +63,9 @@ void render_entity (FrameBuffer *fb, Camera *camera, GameObject *entity, unsigne
             continue;
         }
 
-        int point_world_x = (int)entity->v_x + entity->shape.rotated_points[i].x;
-        int point_world_y = (int)entity->v_y + entity->shape.rotated_points[i].y;
+        int point_world_x = (int)(entity->v_x + 0.5) + entity->shape.rotated_points[i].x;
+        int point_world_y = (int)(entity->v_y + 0.5) + entity->shape.rotated_points[i].y;
+
         
         int screen_x = point_world_x - camera->x;
         int screen_y = point_world_y - camera->y;
@@ -92,7 +99,7 @@ void render_entity (FrameBuffer *fb, Camera *camera, GameObject *entity, unsigne
                 default:
                     ch = '*';
             }
-            buffer_draw_char(fb, screen_x, screen_y, ch, entity->color);
+            buffer_draw_char(fb, screen_x + 1, screen_y + 1, ch, entity->color);
         }
     }
 }
@@ -109,7 +116,7 @@ void render_entities (FrameBuffer *fb, Camera *camera, World *world, unsigned in
 }
 
 void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
-    int sqr_size = 3;
+    int sqr_size = 8;
     for (int screen_y = 0; screen_y < camera->height; screen_y++) {
         for (int screen_x = 0; screen_x < camera->width; screen_x++) {
             int world_x = camera->x + screen_x;
@@ -119,12 +126,26 @@ void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
             
             char ch;
             Color color;
+            
             if (terrain == TERRAIN_WALL) {
-                ch = '#';
+                // Check if any neighbor is not a wall (border detection)
+                bool is_border = 
+                    world_get_terrain(world, world_x - 1, world_y) != TERRAIN_WALL ||
+                    world_get_terrain(world, world_x + 1, world_y) != TERRAIN_WALL ||
+                    world_get_terrain(world, world_x, world_y - 1) != TERRAIN_WALL ||
+                    world_get_terrain(world, world_x, world_y + 1) != TERRAIN_WALL;
+                
+                if (is_border) {
+                    ch = '.';  // Border character
+                } else {
+                    ch = '#';  // Interior character
+                }
                 color = COLOR_BLACK;
             } else {
-                get_check(world_x,  world_y, sqr_size, &ch, &color);
+                // This is the floor - keep the checkered pattern
+                get_check(world_x, world_y, sqr_size, &ch, &color);
             }
+            
             buffer_draw_char(fb, screen_x + 1, screen_y + 1, ch, color);
         }
     }
