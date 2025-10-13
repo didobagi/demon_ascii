@@ -13,10 +13,17 @@ void render_char(char ch, int x, int y);
 void render (FrameBuffer *fb, GameObject *obj, float center_x, float center_y,
              bool erase, unsigned int frame);
 
-void render_enemies (FrameBuffer *fb, Enemy *enemies, int count, int screen_w, int screen_h, unsigned int frame);
+void render_enemies (FrameBuffer *fb, Enemy *enemies, int count, int screen_w,
+                     int screen_h, unsigned int frame);
 void render_background (FrameBuffer *fb, int max_x, int max_y, unsigned int frame,
                 Sector sectors[SECTOR_ROWS][SECTOR_COLS]);
 
 void render_collectibles (FrameBuffer *fb, CollectiblePoint *collectibles, int count, unsigned int frame);
+
+
+void render_world(FrameBuffer *fb, World *world, Camera *camera, unsigned int frame);
+void render_terrain (FrameBuffer *fb, Camera *camera, World *world);
+void render_entities (FrameBuffer *fb, Camera *camera, World *world, unsigned int frame);
+void render_entity (FrameBuffer *fb, Camera *camera, GameObject *entity, unsigned int frame);
 
 #endif

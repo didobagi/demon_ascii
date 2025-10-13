@@ -30,7 +30,7 @@ MapGenResult generate_dungeon(World *world, TemplateLibrary *library, MapGenPara
 
 bool rooms_overlap(PlacedRoom *room_a, PlacedRoom *room_b, int spacing);
 void stamp_template_to_world(World *world, Template *templ, int x, int y);
-static void carve_corridor_seg(World *world, int x1, int y1, int x2, int y2, int width);
+void carve_corridor_seg(World *world, int x1, int y1, int x2, int y2, int width);
 void free_map_gen_result (MapGenResult *result);
 
 #endif

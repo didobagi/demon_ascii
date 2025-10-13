@@ -87,7 +87,7 @@ static bool try_place_room(World *world, Template *template,
     return false;
 }
 
-static void carve_corridor_seg(World *world, int x1, int y1, int x2, int y2, int width) {
+void carve_corridor_seg(World *world, int x1, int y1, int x2, int y2, int width) {
     bool is_horizontal = (y1 == y2);
 
     if (is_horizontal) {
@@ -255,7 +255,7 @@ MapGenResult generate_dungeon(World *world, TemplateLibrary *library, MapGenPara
 
     if (result.room_count >= 2) {
         generate_corridors(world, result.rooms, result.room_count,
-                           3, params.extra_corridor_chance);
+                           12, params.extra_corridor_chance);
     }
     return result;
 }
