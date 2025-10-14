@@ -23,4 +23,12 @@ extern Point* carachter_breathe_frames[];
 extern int carachter_breathe_frame_counts[];
 extern const int carachter_breathe_total_frames;
 
+extern Point* monkey_walk_frames[];
+extern int monkey_walk_frame_counts[];
+extern const int monkey_walk_total_frames;
+
+extern Point* monkey_idle_frames[];
+extern int monkey_idle_frame_counts[];
+extern const int monkey_idle_total_frames;
+
 #endif

@@ -51,6 +51,11 @@ typedef enum {
 } AIState;
 
 typedef enum {
+    ANIM_STATE_IDLE,
+    ANIM_STATE_WALK,
+} AnimationState;
+
+typedef enum {
     TERRAIN_FLOOR,
     TERRAIN_WALL,
     TERRAIN_OPTIONAL_WALL,
@@ -149,7 +154,16 @@ typedef struct GameObject {
     bool point_collected[100];
     int total_collected_count;
 
-    //animation
+    Point **anim_idle_frames;
+    int *anim_idle_frame_counts;
+    int anim_idle_total_frames;
+
+    Point **anim_walk_frames;
+    int *anim_walk_frame_counts;
+    int anim_walk_total_frames;
+
+    AnimationState current_anim_state;
+
     Point **animation_frames;
     int *animation_frame_counts;
     int animation_total_frames;

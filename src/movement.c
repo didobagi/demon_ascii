@@ -1,5 +1,6 @@
 #include "../include/movement.h"
 #include "../include/collision.h"
+#include "../include/animation.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -16,7 +17,6 @@ void movement_init_entity (GameObject *entity) {
 }
 
 bool movement_try_mov (GameObject *entity, World *world, int dx, int dy) {
-    extern FILE *debug_log;
     
     int target_x = entity->cell_x + dx;
     int target_y = entity->cell_y + dy;
@@ -31,12 +31,7 @@ bool movement_try_mov (GameObject *entity, World *world, int dx, int dy) {
     
     world_remove_entity(world, entity->cell_x, entity->cell_y, entity);
     
-    if (debug_log && dx != 0) {  // Only log horizontal movement
-        fprintf(debug_log, "MOVE: dx=%d | cell_x: %d->%d | v_x: %.2f | is_moving: %d\n",
-                dx, entity->cell_x, target_x, entity->v_x, entity->is_moving);
-        fflush(debug_log);
-    }
-    
+
     //if (entity->is_moving) {
     //    entity->v_x = (float)entity->cell_x;
     //    entity->v_y = (float)entity->cell_y;
@@ -47,6 +42,13 @@ bool movement_try_mov (GameObject *entity, World *world, int dx, int dy) {
     entity->target_v_x = (float)target_x;
     entity->target_v_y = (float)target_y;
     entity->is_moving = true;
+
+
+if (entity->entity_type == ENTITY_PLAYER) {
+    animation_switch_to(entity, ANIM_STATE_WALK, 0.3f); // WALK when moving!
+} else if (entity->entity_type == ENTITY_ENEMY) {
+    animation_switch_to(entity, ANIM_STATE_WALK, 0.15f); // WALK when moving!
+}
     
     if (dx != 0) {
         entity->move_speed = HORIZONTAL_SPEED;
@@ -71,9 +73,12 @@ void movement_update (GameObject *entity, float delta_time) {
         entity->v_x = entity->target_v_x;
         entity->v_y = entity->target_v_y;
         entity->is_moving = false;
+        if (entity->entity_type == ENTITY_PLAYER) {
+            animation_switch_to(entity, ANIM_STATE_IDLE, 0.3f); // Player breathing
+        }
         return;
     }
-    
+
     float move_amount = entity->move_speed;
     if (move_amount > dist) {
         move_amount = dist;

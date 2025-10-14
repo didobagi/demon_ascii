@@ -1,5 +1,6 @@
 #include "../include/spawn.h"
 #include "../include/enemy_ai.h"
+#include "../include/animation.h"
 #include "../include/types.h"
 #include "../include/shapes.h"
 #include <stdlib.h>
@@ -33,14 +34,20 @@ static GameObject* create_enemy(int world_x, int world_y) {
     enemy->target_v_y = enemy->v_y;
     enemy->move_speed = 1.0f;
 
+
     enemy->color = COLOR_YELLOW;
 
-    enemy->shape.original_points = monkey_template;
-    enemy->shape.point_count = monkey_point_count;
+    enemy->anim_idle_frames = monkey_idle_frames;
+    enemy->anim_idle_frame_counts = monkey_idle_frame_counts;
+    enemy->anim_idle_total_frames = monkey_idle_total_frames;
+    enemy->anim_walk_frames = monkey_walk_frames;
+    enemy->anim_walk_frame_counts = monkey_walk_frame_counts;
+    enemy->anim_walk_total_frames = monkey_walk_total_frames;
     enemy->shape.texture = TEXTURE_SOLID;
 
-    enemy->shape.rotated_points = malloc(sizeof(Point) * enemy->shape.point_count);
-    enemy->shape.distances = malloc(sizeof(float) * enemy->shape.point_count);
+
+    enemy->shape.rotated_points = malloc(sizeof(Point) * 100);
+    enemy->shape.distances = malloc(sizeof(float) * 100);
 
     if (!enemy->shape.rotated_points || !enemy->shape.distances) {
         if (enemy->shape.rotated_points) free(enemy->shape.rotated_points);
@@ -48,6 +55,9 @@ static GameObject* create_enemy(int world_x, int world_y) {
         free(enemy);
         return NULL;
     }
+
+    enemy->current_anim_state = ANIM_STATE_WALK;
+    animation_switch_to(enemy, ANIM_STATE_IDLE, 0.3f);
 
     for (int i = 0; i < enemy->shape.point_count; i++) {
         enemy->shape.rotated_points[i] = enemy->shape.original_points[i];

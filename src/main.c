@@ -162,10 +162,16 @@ int main() {
     world_add_entity(world, player.cell_x, player.cell_y, &player);
     movement_init_entity(&player);
 
-    animation_set(&player, carachter_breathe_frames,
-            carachter_breathe_frame_counts,
-            carachter_breathe_total_frames,
-            0.2f);
+    player.anim_idle_frames = carachter_breathe_frames;
+    player.anim_idle_frame_counts = carachter_breathe_frame_counts;
+    player.anim_idle_total_frames = carachter_breathe_total_frames;
+
+    player.anim_walk_frames = carachter_breathe_frames;
+    player.anim_walk_frame_counts = carachter_breathe_frame_counts;
+    player.anim_walk_total_frames = carachter_breathe_total_frames;
+
+    player.current_anim_state = ANIM_STATE_WALK;
+    animation_switch_to(&player, ANIM_STATE_IDLE, 0.2f);
 
     Camera camera;
     camera_init(&camera, term_width, term_height);
@@ -189,6 +195,7 @@ int main() {
         for (int i = 0;i < enemy_count;i ++) {
             if (all_enemies[i] && all_enemies[i]->active) {
                 enemy_ai_update(all_enemies[i], &player, world, FRAME_TIME);
+                animation_update(all_enemies[i], FRAME_TIME);
                 movement_update(all_enemies[i], FRAME_TIME);
             }
         }

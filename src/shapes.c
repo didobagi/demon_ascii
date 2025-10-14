@@ -211,3 +211,143 @@ int carachter_breathe_frame_counts[] = {
 };
 
 const int carachter_breathe_total_frames = 8; 
+
+// Monkey walking animation
+Point monkey_walk_frame0[] = {
+    {4, -5},
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {3, -4}, {4, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1},
+    {-2, 0},
+    {-3, 1}, {-2, 1},
+    {-4, 2},
+    {-5, 3},
+    {-5, 4}
+};
+
+Point monkey_walk_frame1[] = {
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {3, -4}, {4, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3}, {4, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1},
+    {-2, 0},
+    {-3, 1}, {-2, 1},
+    {-4, 2},
+    {-5, 3}
+};
+
+Point monkey_walk_frame2[] = {
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {3, -4}, {4, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3}, {4, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1},
+    {-2, 0},
+    {-3, 1}, {-2, 1},
+    {-4, 2},
+    {-5, 3},
+    {-4, 4}
+};
+
+Point monkey_walk_frame3[] = {
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {3, -4}, {4, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3}, {4, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {1, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1},
+    {-2, 0},
+    {-3, 1}, {-2, 1},
+    {-4, 2},
+    {-4, 3},
+    {-4, 4}, {-3, 4}
+};
+
+Point monkey_walk_frame4[] = {
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {3, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3}, {3, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {1, -2}, {3, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1},
+    {-2, 0},
+    {-3, 1}, {-2, 1},
+    {-4, 2},
+    {-4, 3},
+    {-4, 4}, {-3, 4}
+};
+
+Point monkey_walk_frame5[] = {
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {3, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3}, {3, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {1, -2}, {3, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {4, -1},
+    {-2, 0}, {3, 0}, {4, 0},
+    {-3, 1}, {-2, 1},
+    {-4, 2},
+    {-4, 3}, {-2, 3},
+    {-4, 4}, {-3, 4}
+};
+
+Point monkey_walk_frame6[] = {
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3}, {3, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {1, -2}, {3, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {3, -1},
+    {-2, 0}, {3, 0},
+    {-3, 1}, {-2, 1}, {1, 1}, {2, 1},
+    {-4, 2},
+    {-4, 3}, {-2, 3},
+    {-4, 4}, {-3, 4}
+};
+
+Point monkey_walk_frame7[] = {
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3}, {3, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {1, -2}, {3, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {3, -1},
+    {-2, 0}, {4, 0},
+    {-3, 1}, {-2, 1}, {1, 1}, {4, 1},
+    {-4, 2}, {2, 2}, {3, 2}, {4, 2},
+    {-4, 3}, {-1, 3},
+    {-3, 4}, {-2, 4}, {-1, 4}
+};
+
+const int monkey_walk_frame0_count = sizeof(monkey_walk_frame0)/sizeof(Point);
+const int monkey_walk_frame1_count = sizeof(monkey_walk_frame1)/sizeof(Point);
+const int monkey_walk_frame2_count = sizeof(monkey_walk_frame2)/sizeof(Point);
+const int monkey_walk_frame3_count = sizeof(monkey_walk_frame3)/sizeof(Point);
+const int monkey_walk_frame4_count = sizeof(monkey_walk_frame4)/sizeof(Point);
+const int monkey_walk_frame5_count = sizeof(monkey_walk_frame5)/sizeof(Point);
+const int monkey_walk_frame6_count = sizeof(monkey_walk_frame6)/sizeof(Point);
+const int monkey_walk_frame7_count = sizeof(monkey_walk_frame7)/sizeof(Point);
+
+Point* monkey_walk_frames[] = {
+    monkey_walk_frame0,
+    monkey_walk_frame1,
+    monkey_walk_frame2,
+    monkey_walk_frame3,
+    monkey_walk_frame4,
+    monkey_walk_frame5,
+    monkey_walk_frame6,
+    monkey_walk_frame7,
+};
+
+int monkey_walk_frame_counts[] = {
+    monkey_walk_frame0_count,
+    monkey_walk_frame1_count,
+    monkey_walk_frame2_count,
+    monkey_walk_frame3_count,
+    monkey_walk_frame4_count,
+    monkey_walk_frame5_count,
+    monkey_walk_frame6_count,
+    monkey_walk_frame7_count,
+};
+
+const int monkey_walk_total_frames = 8;
+
+Point* monkey_idle_frames[] = {
+    monkey_walk_frame0  // Just reuse first walk frame
+};
+
+int monkey_idle_frame_counts[] = {
+    monkey_walk_frame0_count
+};
+
+const int monkey_idle_total_frames = 1;
