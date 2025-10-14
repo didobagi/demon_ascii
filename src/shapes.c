@@ -1,7 +1,12 @@
 #include "../include/shapes.h"
 #include "../include/types.h"
 
-Point character_test_template[] = {
+
+// =============
+// STATIC SHAPES
+// =============
+
+Point carachter_test_template[] = {
     {-4, -5}, {3, -5},
     {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
     {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
@@ -103,5 +108,106 @@ const int demon_point_count = sizeof(demon_template)/sizeof(Point);
 const int demon_snake_point_count = sizeof(demon_snake_template)/sizeof(Point);
 const int tower_point_count = sizeof(tower_template)/sizeof(Point);
 const int monkey_point_count = sizeof(monkey_template)/sizeof(Point);
-const int character_test_point_count = sizeof(character_test_template)/sizeof(Point);
+const int carachter_test_point_count = sizeof(carachter_test_template)/sizeof(Point);
 const int eye_point_count = sizeof(eye_template)/sizeof(Point);
+
+
+
+// ===============
+// ANIMATED SHAPES
+// ===============
+
+Point carachter_breathe_frame0[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1},  // Hole starts here
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-4, 2}, {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2},
+    {-4, 3}, {-1, 3}, {3, 3},
+    {-4, 4}, {-1, 4}, {3, 4}
+};
+
+Point carachter_breathe_frame1[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, /* hole */ {1, -1}, {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-4, 2}, {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2},
+    {-4, 3}, {-1, 3}, {3, 3},
+    {-4, 4}, {-1, 4}, {3, 4}
+};
+
+Point carachter_breathe_frame2[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, /* hole */ {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-4, 2}, {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2},
+    {-4, 3}, {-1, 3}, {3, 3},
+    {-4, 4}, {-1, 4}, {3, 4}
+};
+
+Point carachter_breathe_frame3[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, /* hole */ {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, /* hole */ {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-4, 2}, {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2},
+    {-4, 3}, {-1, 3}, {3, 3},
+    {-4, 4}, {-1, 4}, {3, 4}
+};
+
+Point carachter_breathe_frame4[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, /* large hole */ {1, -2}, {2, -2},
+    {-3, -1}, /* large hole */ {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-4, 2}, {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2},
+    {-4, 3}, {-1, 3}, {3, 3},
+    {-4, 4}, {-1, 4}, {3, 4}
+};
+
+const int carachter_breathe_frame0_count = sizeof(carachter_breathe_frame0)/sizeof(Point);
+const int carachter_breathe_frame1_count = sizeof(carachter_breathe_frame1)/sizeof(Point);
+const int carachter_breathe_frame2_count = sizeof(carachter_breathe_frame2)/sizeof(Point);
+const int carachter_breathe_frame3_count = sizeof(carachter_breathe_frame3)/sizeof(Point);
+const int carachter_breathe_frame4_count = sizeof(carachter_breathe_frame4)/sizeof(Point);
+
+Point* carachter_breathe_frames[] = {
+    carachter_breathe_frame0,
+    carachter_breathe_frame1,
+    carachter_breathe_frame2,
+    carachter_breathe_frame3,
+    carachter_breathe_frame4,
+    carachter_breathe_frame3,  
+    carachter_breathe_frame2,
+    carachter_breathe_frame1,
+};
+
+int carachter_breathe_frame_counts[] = {
+    carachter_breathe_frame0_count,
+    carachter_breathe_frame1_count,
+    carachter_breathe_frame2_count,
+    carachter_breathe_frame3_count,
+    carachter_breathe_frame4_count,
+    carachter_breathe_frame3_count,
+    carachter_breathe_frame2_count,
+    carachter_breathe_frame1_count,
+};
+
+const int carachter_breathe_total_frames = 8; 

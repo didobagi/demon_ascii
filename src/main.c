@@ -19,6 +19,8 @@
 #include "../include/movement.h"
 #include "../include/spawn.h"
 #include "../include/enemy_ai.h"
+#include "../include/rotation.h"
+#include "../include/animation.h"
 
 #define FRAME_TIME 0.016f
 
@@ -82,7 +84,10 @@ void handle_player_command(World *world, GameObject *player, PlayerCommand cmd) 
         case CMD_MOVE_RIGHT: dx = 1; break;
         default: return;
     }
-    
+
+    if (dx != 0) {
+    update_entity_facing(player, dx, 0);
+    }
     if (movement_try_mov(player, world, dx, dy)) {
         moved_this_frame = true;
     }
@@ -148,25 +153,19 @@ int main() {
     player.v_y = (float)player.cell_y;
     player.color = COLOR_RED;
 
-    player.shape.original_points = character_test_template;
-    player.shape.point_count = character_test_point_count;
     player.shape.texture = TEXTURE_FIRE;
-
     static Point player_rotated[100];
     player.shape.rotated_points = player_rotated;
-
     static float player_distances[100];
     player.shape.distances = player_distances;
 
-    for (int i = 0; i < player.shape.point_count; i++) {
-        float x = character_test_template[i].x;
-        float y = character_test_template[i].y;
-        player.shape.distances[i] = sqrt(x*x + y*y);
-        player.shape.rotated_points[i] = character_test_template[i];
-    }
-
     world_add_entity(world, player.cell_x, player.cell_y, &player);
     movement_init_entity(&player);
+
+    animation_set(&player, carachter_breathe_frames,
+            carachter_breathe_frame_counts,
+            carachter_breathe_total_frames,
+            0.2f);
 
     Camera camera;
     camera_init(&camera, term_width, term_height);
@@ -184,6 +183,7 @@ int main() {
         }
 
         handle_player_command(world, &player, cmd);
+        animation_update(&player, FRAME_TIME);
         movement_update(&player, FRAME_TIME);
 
         for (int i = 0;i < enemy_count;i ++) {

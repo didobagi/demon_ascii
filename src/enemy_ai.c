@@ -1,5 +1,6 @@
 #include "../include/enemy_ai.h"
 #include "../include/movement.h"
+#include "../include/rotation.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -35,7 +36,49 @@ bool enemy_try_move_toward (GameObject *enemy, int target_x, int target_y, World
     if (dx == 0 && dy == 0) {
         return false;
     }
-    return movement_try_mov(enemy, world, dx, dy);
+
+    update_entity_facing(enemy, dx, dy);
+    if (movement_try_mov(enemy, world, dx, dy)) {
+        return true;
+    }
+
+    //path blocked
+
+    if (dx != 0) {
+        update_entity_facing(enemy, dx, 0);
+        if (movement_try_mov(enemy, world, dx, 0)) {
+            return true;
+        }
+    }
+    if (dy != 0) {
+        update_entity_facing(enemy, 0, dy);
+        if (movement_try_mov(enemy, world, 0, dy)) {
+            return true;
+        }
+    }
+
+    if (dx != 0) {
+        update_entity_facing(enemy, 0, 1);
+        if (movement_try_mov(enemy, world, 0, 1)) {
+            return true;
+        }
+        update_entity_facing(enemy, 0, -1);
+        if (movement_try_mov(enemy, world, 0, -1)) {
+            return true;
+        }
+    }
+    if (dy != 0) {
+        update_entity_facing(enemy, 1, 0);
+        if (movement_try_mov(enemy, world, 1, 0)) {
+            return true;
+        }
+        update_entity_facing(enemy, -1, 0);
+        if (movement_try_mov(enemy, world, -1, 0)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool enemy_try_flee_from(GameObject *enemy, int target_x, int target_y, World *world) {
@@ -51,7 +94,47 @@ bool enemy_try_flee_from(GameObject *enemy, int target_x, int target_y, World *w
         dy = (rand() % 3) - 1;
     }
 
-    return movement_try_mov(enemy, world, dx, dy);
+    update_entity_facing(enemy, dx, dy);
+    if (movement_try_mov(enemy, world, dx, dy)) {
+        return true;
+    }
+    //path blocked
+
+    if (dx != 0) {
+        update_entity_facing(enemy, dx, 0);
+        if (movement_try_mov(enemy, world, dx, 0)) {
+            return true;
+        }
+    }
+    if (dy != 0) {
+        update_entity_facing(enemy, 0, dy);
+        if (movement_try_mov(enemy, world, 0, dy)) {
+            return true;
+        }
+    }
+
+    if (dx != 0) {
+        update_entity_facing(enemy, 0, 1);
+        if (movement_try_mov(enemy, world, 0, 1)) {
+            return true;
+        }
+        update_entity_facing(enemy, 0, -1);
+        if (movement_try_mov(enemy, world, 0, -1)) {
+            return true;
+        }
+    }
+    if (dy != 0) {
+        update_entity_facing(enemy, 1, 0);
+        if (movement_try_mov(enemy, world, 1, 0)) {
+            return true;
+        }
+        update_entity_facing(enemy, -1, 0);
+        if (movement_try_mov(enemy, world, -1, 0)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool enemy_try_wander(GameObject *enemy, World *world) {
@@ -62,6 +145,8 @@ bool enemy_try_wander(GameObject *enemy, World *world) {
     if (dx == 0 && dy == 0) {
         dx = (rand() % 2) * 2 -1; // -1 | 1
     }
+
+    update_entity_facing(enemy, dx, dy);
 
     return movement_try_mov(enemy, world, dx, dy);
 }

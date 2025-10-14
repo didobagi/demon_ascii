@@ -121,6 +121,7 @@ typedef struct GameObject {
     int cell_x, cell_y;
     float v_x, v_y;
     float target_v_x, target_v_y;
+    float facing_angle;
     bool is_moving;
     float move_speed;
     float move_start_x, move_start_y;
@@ -147,6 +148,14 @@ typedef struct GameObject {
     bool in_snake_form;
     bool point_collected[100];
     int total_collected_count;
+
+    //animation
+    Point **animation_frames;
+    int *animation_frame_counts;
+    int animation_total_frames;
+    int animation_current_frame;
+    float animation_timer;
+    float animation_speed;
 
     //int  health;
     //int  max_health;

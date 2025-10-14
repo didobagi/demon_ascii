@@ -32,4 +32,5 @@ void execute_enemy_state_behaviour (Enemy *enemy, GameObject *player, unsigned i
 
 float calculate_distance (Enemy *enemy, GameObject *player);
 void change_enemy_state (Enemy *enemy, AIState new_state, unsigned int frame);
+
 #endif
