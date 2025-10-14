@@ -1,6 +1,19 @@
 #include "../include/shapes.h"
 #include "../include/types.h"
 
+Point character_test_template[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-4, 2}, {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2},
+    {-4, 3}, {-1, 3}, {3, 3},
+    {-4, 4}, {-1, 4}, {3, 4}
+};
+
 Point ghost_template[] = {
     {0, 3},
     {0, 2}, {1, 2},
@@ -59,7 +72,36 @@ Point tower_template[] = {
     {-2, 20}, {-1, 20}, {0, 20}, {1, 20}, {2, 20}
 };
 
+Point monkey_template[] = {
+    {4, -5},
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {3, -4}, {4, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-2, -3}, {2, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1},
+    {-2, 0},
+    {-3, 1}, {-2, 1},
+    {-4, 2},
+    {-5, 3},
+    {-5, 4}
+};
+
+Point eye_template[] = {
+    {-4, -5}, {-3, -5}, {-2, -5}, {-1, -5}, {0, -5}, {1, -5}, {2, -5},
+    {-4, -4}, {3, -4},
+    {-5, -3}, {3, -3}, {4, -3},
+    {-5, -2}, {4, -2},
+    {-5, -1}, {4, -1},
+    {-5, 0}, {-2, 0}, {0, 0}, {4, 0},
+    {-5, 1}, {-2, 1}, {-1, 1}, {0, 1}, {3, 1},
+    {-5, 2}, {-2, 2}, {-1, 2}, {0, 2}, {3, 2},
+    {-4, 3}, {2, 3},
+    {-3, 4}, {-2, 4}, {-1, 4}, {0, 4}, {1, 4}
+};
+
 const int ghost_point_count = sizeof(ghost_template)/sizeof(Point);
 const int demon_point_count = sizeof(demon_template)/sizeof(Point);
 const int demon_snake_point_count = sizeof(demon_snake_template)/sizeof(Point);
 const int tower_point_count = sizeof(tower_template)/sizeof(Point);
+const int monkey_point_count = sizeof(monkey_template)/sizeof(Point);
+const int character_test_point_count = sizeof(character_test_template)/sizeof(Point);
+const int eye_point_count = sizeof(eye_template)/sizeof(Point);

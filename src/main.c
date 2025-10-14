@@ -17,11 +17,45 @@
 #include "../include/map_builder.h"
 #include "../include/shapes.h"
 #include "../include/movement.h"
+#include "../include/spawn.h"
+#include "../include/enemy_ai.h"
 
 #define FRAME_TIME 0.016f
 
 FILE *debug_log = NULL;
 static bool moved_this_frame = false;
+#define MAX_ENEMIES 100
+static GameObject *all_enemies[MAX_ENEMIES];
+static int enemy_count = 0;
+
+void register_enemy(GameObject *enemy) {
+    if (enemy_count < MAX_ENEMIES) {
+        all_enemies[enemy_count] = enemy;
+        enemy_count++;
+    }
+}
+
+void cleanup_enemies(World *world) {
+    for (int i = 0; i < enemy_count; i++) {
+        if (all_enemies[i]) {
+            world_remove_entity(world, 
+                              all_enemies[i]->cell_x, 
+                              all_enemies[i]->cell_y, 
+                              all_enemies[i]);
+            
+            if (all_enemies[i]->shape.rotated_points) {
+                free(all_enemies[i]->shape.rotated_points);
+            }
+            if (all_enemies[i]->shape.distances) {
+                free(all_enemies[i]->shape.distances);
+            }
+            
+            free(all_enemies[i]);
+            all_enemies[i] = NULL;
+        }
+    }
+    enemy_count = 0;
+}
 
 void init_term(int *width, int *height) {
     usleep(50000);
@@ -79,9 +113,11 @@ int main() {
     }
 
     TemplateLibrary *library = create_template_library();
-    Template *test_room = load_template_from_file("templates/test_room.txt");
-    if (test_room) {
-        add_template_to_library(library, test_room);
+    //Template *test_room = load_template_from_file("templates/test_room.txt");
+    Template *large_room = load_template_from_file("templates/large_room.txt");
+    //Template *wierd_room = load_template_from_file("templates/strange_room.txt");
+    if (large_room) {
+        add_template_to_library(library, large_room);
     }
 
     MapGenParams params = {
@@ -93,6 +129,7 @@ int main() {
     };
 
     MapGenResult gen_result = generate_dungeon(world, library, params);
+    spawn_all_enemies(world, &gen_result, library);
 
     GameObject player;
     memset(&player, 0, sizeof(GameObject));
@@ -109,10 +146,10 @@ int main() {
 
     player.v_x = (float)player.cell_x;
     player.v_y = (float)player.cell_y;
-    player.color = COLOR_BRIGHT_RED;
+    player.color = COLOR_RED;
 
-    player.shape.original_points = demon_template;
-    player.shape.point_count = demon_point_count;
+    player.shape.original_points = character_test_template;
+    player.shape.point_count = character_test_point_count;
     player.shape.texture = TEXTURE_FIRE;
 
     static Point player_rotated[100];
@@ -122,10 +159,10 @@ int main() {
     player.shape.distances = player_distances;
 
     for (int i = 0; i < player.shape.point_count; i++) {
-        float x = demon_template[i].x;
-        float y = demon_template[i].y;
+        float x = character_test_template[i].x;
+        float y = character_test_template[i].y;
         player.shape.distances[i] = sqrt(x*x + y*y);
-        player.shape.rotated_points[i] = demon_template[i];
+        player.shape.rotated_points[i] = character_test_template[i];
     }
 
     world_add_entity(world, player.cell_x, player.cell_y, &player);
@@ -148,6 +185,14 @@ int main() {
 
         handle_player_command(world, &player, cmd);
         movement_update(&player, FRAME_TIME);
+
+        for (int i = 0;i < enemy_count;i ++) {
+            if (all_enemies[i] && all_enemies[i]->active) {
+                enemy_ai_update(all_enemies[i], &player, world, FRAME_TIME);
+                movement_update(all_enemies[i], FRAME_TIME);
+            }
+        }
+
         camera_follow_entity_smooth(&camera, &player, WORLD_WIDTH, WORLD_HEIGHT);
         render_world(&fb, world, &camera, frame);
 
@@ -160,6 +205,7 @@ int main() {
         fclose(debug_log);
     }
 
+    cleanup_enemies(world);
     free_map_gen_result(&gen_result);
     destroy_template_library(library);
     destroy_world(world);

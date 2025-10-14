@@ -7,6 +7,8 @@
 #define SECTOR_COLS 8
 #define SECTOR_ROWS 4
 #define CORE_SNAKE_POINTS 15
+#define WANDER_MOVE_INTERVAL 0.5f
+
 
 typedef struct Sector {
     bool is_dangerous;
@@ -130,8 +132,11 @@ typedef struct GameObject {
     Color color;
     CollisionData collision;
 
-    AIState current_state;
+    AIState ai_state;
     unsigned int state_entered_frame;
+    float alert_timer;
+    float wander_timer;
+    float move_timer;
     float speed;
 
     Point *demon_form_template;

@@ -1,0 +1,51 @@
+#include "../include/spawn.h"
+#include "../include/shapes.h"
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
+static GameObject* create_enemy(int world_x, int world_y) {
+    GameObject *enemy = malloc(sizeof(GameObject));
+    if (!enemy) {
+        return NULL;
+    }
+
+        memset(enemy, 0, sizeof(GameObject));
+
+            enemy->entity_type = ENTITY_ENEMY;
+    enemy->active = true;
+
+        enemy->cell_x = world_x;
+    enemy->cell_y = world_y;
+    enemy->v_x = (float)world_x;
+    enemy->v_y = (float)world_y;
+
+        enemy->color = COLOR_CYAN;
+
+            enemy->shape.original_points = ghost_template;
+    enemy->shape.point_count = ghost_point_count;
+    enemy->shape.texture = TEXTURE_SOLID;
+
+        enemy->shape.rotated_points = malloc(sizeof(Point) * enemy->shape.point_count);
+    enemy->shape.distances = malloc(sizeof(float) * enemy->shape.point_count);
+
+        if (!enemy->shape.rotated_points || !enemy->shape.distances) {
+        if (enemy->shape.rotated_points) free(enemy->shape.rotated_points);
+        if (enemy->shape.distances) free(enemy->shape.distances);
+        free(enemy);
+        return NULL;
+    }
+
+            for (int i = 0; i < enemy->shape.point_count; i++) {
+        enemy->shape.rotated_points[i] = enemy->shape.original_points[i];
+        
+        float x = enemy->shape.original_points[i].x;
+        float y = enemy->shape.original_points[i].y;
+        enemy->shape.distances[i] = sqrt(x*x + y*y);
+    }
+    enemy->ai_state = AI_STATE_IDLE;
+    enemy->alert_timer = 0.0f;
+    
+    return enemy;
+}
+

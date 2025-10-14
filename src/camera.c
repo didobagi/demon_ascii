@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define CAMERA_LERP_SPEED 0.5f
+#define CAMERA_LERP_SPEED 0.7f
 
 void camera_init(Camera *camera, int viewport_width, int viewport_height) {
     camera->x_float = 0.0f;

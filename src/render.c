@@ -37,7 +37,7 @@ char get_fire_char (int  point_index, float distance, unsigned int frame, float 
     int phase = (point_index * 7 + (int)(distance * 3)) % 20;
     int cycle = (frame + phase) % 40;
 
-    if (cycle < 10) return '#';
+    if (cycle < 10) return ' ';
     if (cycle < 20) return '@';
     if (cycle < 30) return '*';
     if (cycle < 35) return '+';
@@ -136,11 +136,12 @@ void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
                     world_get_terrain(world, world_x, world_y + 1) != TERRAIN_WALL;
                 
                 if (is_border) {
-                    ch = '.';  // Border character
+                    ch = 'o';  // Border character
+                    color = COLOR_BRIGHT_BLACK;
                 } else {
                     ch = '#';  // Interior character
+                    color = COLOR_BLACK;
                 }
-                color = COLOR_BLACK;
             } else {
                 // This is the floor - keep the checkered pattern
                 get_check(world_x, world_y, sqr_size, &ch, &color);
