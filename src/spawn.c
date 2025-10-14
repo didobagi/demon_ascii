@@ -69,14 +69,17 @@ static GameObject* create_enemy(int world_x, int world_y) {
     enemy->ai_state = AI_STATE_IDLE;
     enemy->alert_timer = 0.0f;
 
-    //reg each enemy
-    extern void register_enemy(GameObject *enemy);
-    register_enemy(enemy);
     return enemy;
 }
 
-int spawn_enemies_in_room(World *world, PlacedRoom *room, Template *template) {
-    int spawned_count = 0;
+SpawnResult spawn_enemies_in_room(World *world, PlacedRoom *room, Template *template) {
+    GameObject **enemies = malloc(sizeof(GameObject*) * 50);  // Max 50 per room
+    int count = 0;
+
+    if (!enemies) {
+        SpawnResult empty = {NULL, 0};
+        return empty;
+    }
     
     for (int ty = 0; ty < template->height; ty++) {
         for (int tx = 0; tx < template->width; tx++) {
@@ -90,33 +93,57 @@ int spawn_enemies_in_room(World *world, PlacedRoom *room, Template *template) {
                 GameObject *enemy = create_enemy(world_x, world_y);
                 if (enemy) {
                     world_add_entity(world, world_x, world_y, enemy);
-                    spawned_count++;
+                    enemies[count] = enemy;
+                    count++;
+
+                    if (count >= 50) {
+                        break;
+                    }
                 }
             }
         }
+        if (count >= 50) break;
     }
-    
-    return spawned_count;
+    SpawnResult result = {enemies, count};
+    return result;
 }
 
-void spawn_all_enemies(World *world, MapGenResult *gen_result, TemplateLibrary *library) {
-    int total_spawned = 0;
+SpawnResult spawn_all_enemies(World *world, MapGenResult *gen_result, TemplateLibrary *library) {
+     GameObject **all_enemies = malloc(sizeof(GameObject*) * 500); //so many enemies better then callback
+    int total_count = 0;
     
+        if (!all_enemies) {
+        SpawnResult empty = {NULL, 0};
+        return empty;
+    }
+
     for (int i = 0; i < gen_result->room_count; i++) {
         PlacedRoom *room = &gen_result->rooms[i];
         
         Template *template = get_template_by_name(library, room->name);
         
         if (template) {
-            int spawned = spawn_enemies_in_room(world, room, template);
-            total_spawned += spawned;
+            SpawnResult room_result = spawn_enemies_in_room(world, room, template);
+            
+            for (int j = 0;j < room_result.count;j ++) {
+                if (total_count > 500) {
+                    free(room_result.enemies);
+                    break;
+                }
+                all_enemies[total_count] = room_result.enemies[j];
+                total_count++;
+            }
+            free(room_result.enemies);
         }
     }
     
     extern FILE *debug_log;
     if (debug_log) {
         fprintf(debug_log, "Spawned %d enemies across %d rooms\n", 
-                total_spawned, gen_result->room_count);
+                total_count, gen_result->room_count);
         fflush(debug_log);
     }
+
+    SpawnResult result = {all_enemies, total_count};
+    return result;
 }

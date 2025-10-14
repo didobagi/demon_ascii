@@ -47,13 +47,17 @@ bool movement_try_mov (GameObject *entity, World *world, int dx, int dy) {
 if (entity->entity_type == ENTITY_PLAYER) {
     animation_switch_to(entity, ANIM_STATE_WALK, 0.3f); // WALK when moving!
 } else if (entity->entity_type == ENTITY_ENEMY) {
-    animation_switch_to(entity, ANIM_STATE_WALK, 0.15f); // WALK when moving!
+    animation_switch_to(entity, ANIM_STATE_WALK, entity->animation_speed); // WALK when moving!
 }
     
     if (dx != 0) {
+        if (entity->entity_type == ENTITY_PLAYER) {
         entity->move_speed = HORIZONTAL_SPEED;
+        }
     } else {
-        entity->move_speed = VERTICAL_SPEED;
+        if (entity->entity_type == ENTITY_PLAYER) {
+            entity->move_speed = VERTICAL_SPEED;
+        }
     }
     
     world_add_entity(world, entity->cell_x, entity->cell_y, entity);

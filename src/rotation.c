@@ -31,20 +31,40 @@ void update_entity_facing(GameObject *entity, int dx, int dy) {
     }
 
     if (dx < 0) {
-        for (int i = 0;i < entity->shape.point_count;i ++) {
+        // Facing left
+        for (int i = 0; i < entity->shape.point_count; i++) {
             entity->shape.rotated_points[i].x = -entity->shape.original_points[i].x;
             entity->shape.rotated_points[i].y = entity->shape.original_points[i].y;
         }
-        entity  ->facing_angle = M_PI;
+        entity->facing_angle = M_PI;
     } else if (dx > 0) {
-        for (int i = 0;i < entity->shape.point_count;i ++) {
+        // Facing right
+        for (int i = 0; i < entity->shape.point_count; i++) {
             entity->shape.rotated_points[i].x = entity->shape.original_points[i].x;
             entity->shape.rotated_points[i].y = entity->shape.original_points[i].y;
         }
-        entity  ->facing_angle = 0.0f;
+        entity->facing_angle = 0.0f;
+    }
+    // REMOVE THE ELSE BLOCK! Don't touch facing for vertical movement
+    // The entity keeps its previous horizontal facing (left or right)
+}
+
+void apply_facing_to_shape(GameObject *entity) {
+    float angle = entity->facing_angle;
+    
+    if (fabs(angle) < 0.01f) {  // Approximately 0
+        // Facing right
+        for (int i = 0; i < entity->shape.point_count; i++) {
+            entity->shape.rotated_points[i] = entity->shape.original_points[i];
+        }
+    } else if (fabs(angle - M_PI) < 0.01f) {  // Approximately PI
+        // Facing left - mirror X only
+        for (int i = 0; i < entity->shape.point_count; i++) {
+            entity->shape.rotated_points[i].x = -entity->shape.original_points[i].x;
+            entity->shape.rotated_points[i].y = entity->shape.original_points[i].y;
+        }
     } else {
-        float angle = atan2((float)dy, (float)dx);
-        entity->facing_angle = angle;
+        // Other angles - rotate
         rotate_shape(&entity->shape, angle);
     }
 }

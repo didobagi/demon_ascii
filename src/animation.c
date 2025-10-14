@@ -23,7 +23,6 @@ void animation_set(GameObject *entity,
 }
 
 void animation_update(GameObject *entity, float delta_time) {
-        extern FILE *debug_log;
 
     //if (entity->animation_total_frames <= 1) {
     //    return;
@@ -39,21 +38,13 @@ void animation_update(GameObject *entity, float delta_time) {
             entity->animation_current_frame = 0;
         }
 
-    // ADD THIS DEBUG LOG:
-    if (debug_log) {
-        fprintf(debug_log, "ANIM: entity_type=%d frame=%d points=%d\n", 
-                entity->entity_type, entity->animation_current_frame, 
-                entity->animation_frame_counts[entity->animation_current_frame]);
-        fflush(debug_log);
-    }
-
         entity->shape.original_points = 
             entity->animation_frames[entity->animation_current_frame];
         entity->shape.point_count = 
             entity->animation_frame_counts[entity->animation_current_frame];
-        for (int i = 0; i < entity->shape.point_count; i++) {
-            entity->shape.rotated_points[i] = entity->shape.original_points[i];
-        }
+
+        extern void apply_facing_to_shape(GameObject *entity);
+        apply_facing_to_shape(entity);
     }
 }
 
@@ -81,8 +72,8 @@ void animation_switch_to(GameObject *entity, AnimationState new_state, float spe
     if (entity->animation_total_frames > 0) {
         entity->shape.original_points = entity->animation_frames[0];
         entity->shape.point_count = entity->animation_frame_counts[0];
-        for (int i = 0; i < entity->shape.point_count; i++) {
-            entity->shape.rotated_points[i] = entity->shape.original_points[i];
-        }
+
+        extern void apply_facing_to_shape(GameObject *entity);
+        apply_facing_to_shape(entity);
     }
 }

@@ -178,12 +178,18 @@ void enemy_ai_update(GameObject *enemy, GameObject *player, World *world, float 
                 enemy->alert_timer = ALERT_DURATION;
                 if (!player->in_snake_form) {
                     enemy->ai_state = AI_STATE_FLEE;
+                    enemy->move_speed = 1.2f;
+                    enemy->animation_speed = 0.08f;
                 } else {
                 enemy->ai_state = AI_STATE_PURSUE;
+                    enemy->move_speed = 1.1f;
+                    enemy->animation_speed = 0.1f;
                 }
             } else if (enemy->alert_timer <= 0.0f) {
                 enemy->ai_state = AI_STATE_WANDER;
                 enemy->wander_timer = 0.0f;
+                enemy->move_speed = 0.6f;
+                enemy->animation_speed = 0.18f;
             }
             break;
         case AI_STATE_PURSUE:

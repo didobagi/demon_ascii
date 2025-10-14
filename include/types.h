@@ -215,20 +215,6 @@ typedef struct Enemy{
     int max_health;
 } Enemy;
 
-typedef struct GameState {
-    World *world;
-    GameObject objects[MAX_OBJECTS];
-    int object_count;
-    Sector sectors[SECTOR_ROWS][SECTOR_COLS];
-    int max_x;
-    int max_y;
-    unsigned int frame;
-
-    CollectiblePoint collectibles[50];
-    int collectible_count;
-
-    int enemy_count;
-} GameState;
 
 typedef struct KeyState {
     bool up;
