@@ -173,7 +173,7 @@ void dungeon_mode_update(DungeonModeData *data, PlayerCommand cmd, float delta_t
     movement_update(&data->player, delta_time);
     
     //Update vis after player move
-    world_update_visibility(data->world, data->player.cell_x, data->player.cell_y, 226);
+    world_update_visibility(data->world, data->player.cell_x, data->player.cell_y, 31);
     
     // Update enemies
     for (int i = 0; i < data->enemy_count; i++) {

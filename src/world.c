@@ -1,6 +1,7 @@
 #include "../include/world.h"
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 #include <strings.h>
 
 
@@ -151,28 +152,105 @@ int world_entity_in_region (World *world, int min_x,int min_y, int max_x,
     }
     return fount_count;
 }
-void world_update_visibility(World *world, int viewer_x, int viewer_y, int radius) {
-    int total_cells = world->width * world->height;
-    for (int i = 0;i < total_cells;i ++) {
-        world->visibility[i] = false;
+
+static void mark_visible(World *world, int x, int y) {
+    if (x >= 0 && x < world->width && y >= 0 && y < world->height) {
+        world->visibility[y * world->width + x] = true;
     }
+}
 
+static bool is_opaque(World *world, int x, int y) {
+    if (x < 0 || x >= world->width || y < 0 || y >= world->height) {
+        return true;
+    }
+    return world_get_terrain(world, x, y) == TERRAIN_WALL;
+}
 
-    for (int dy = -radius;dy <= radius;dy ++) {
-        for (int dx = -radius;dx <= radius;dx ++) {
-            float distance = sqrt((float)dx*dx + dy*dy);
-
-            if (distance < (float)radius) {
-                int tx = viewer_x + dx;
-                int ty = viewer_y + dy;
-
-                if (tx >= 0 && tx < world->width &&
-                    ty >= 0 && ty < world->height) {
-                    int index = ty * world->width + tx;
-                    world->visibility[index] = true;
+static void cast_light(World *world, int cx, int cy, int row,
+                      float start, float end, int radius,
+                      int xx, int xy, int yx, int yy) {
+    if (start < end) return;
+    
+    int radius_squared = radius * radius;
+    
+    for (int j = row; j <= radius; j++) {
+        int dx = -j - 1;
+        int dy = -j;
+        bool blocked = false;
+        
+        while (dx <= 0) {
+            dx++;
+            
+            int X = cx + dx * xx + dy * xy;
+            int Y = cy + dx * yx + dy * yy;
+            
+            float l_slope = (dx - 0.5f) / (dy + 0.5f);
+            float r_slope = (dx + 0.5f) / (dy - 0.5f);
+            
+            if (start < r_slope) {
+                continue;
+            }
+            else if (end > l_slope) {
+                break;
+            }
+            
+            if (dx * dx + dy * dy < radius_squared) {
+                mark_visible(world, X, Y);
+            }
+            
+            if (blocked) {
+                if (is_opaque(world, X, Y)) {
+                    start = r_slope;
+                    continue;
+                }
+                else {
+                    blocked = false;
+                }
+            }
+            else {
+                if (is_opaque(world, X, Y) && j < radius) {
+                    blocked = true;
+                    cast_light(world, cx, cy, j + 1, start, l_slope, radius,
+                              xx, xy, yx, yy);
+                    start = r_slope;
                 }
             }
         }
+        
+        if (blocked) {
+            break;
+        }
+    }
+}
+
+void world_update_visibility(World *world, int viewer_x, int viewer_y, int radius) {
+    // Store viewer info for gradient rendering
+    world->viewer_x = viewer_x;
+    world->viewer_y = viewer_y;
+    world->view_radius = radius;
+    
+    // Clear all visibility
+    memset(world->visibility, 0, world->width * world->height * sizeof(bool));
+    
+    // Mark viewer position
+    mark_visible(world, viewer_x, viewer_y);
+    
+    // 8 octants for shadowcasting
+    int multipliers[8][4] = {
+        {1,  0,  0,  1},
+        {0,  1,  1,  0},
+        {0, -1,  1,  0},
+        {-1, 0,  0,  1},
+        {-1, 0,  0, -1},
+        {0, -1, -1,  0},
+        {0,  1, -1,  0},
+        {1,  0,  0, -1}
+    };
+    
+    for (int oct = 0; oct < 8; oct++) {
+        cast_light(world, viewer_x, viewer_y, 1, 1.0f, 0.0f, radius,
+                  multipliers[oct][0], multipliers[oct][1],
+                  multipliers[oct][2], multipliers[oct][3]);
     }
 }
 
@@ -182,4 +260,10 @@ bool world_is_visible(World *world, int x, int y) {
     }
     int index = y * world->width + x;
     return world->visibility[index];
+}
+
+float world_get_distance_from_viewer(World *world, int x, int y, int viewer_x, int viewer_y) {
+    int dx = x - viewer_x;
+    int dy = y - viewer_y;
+    return sqrt((float)(dx * dx + dy * dy));
 }

@@ -186,7 +186,6 @@ typedef struct {
     GameObject **entities;  //din array of entity pointers
     int entity_count;
     int entity_capacity;
-
 } Cell;
 
 typedef struct {
@@ -194,6 +193,10 @@ typedef struct {
     int height;
     Cell *grid;
     bool *visibility;
+
+    int viewer_x;
+    int viewer_y;
+    int view_radius;
 } World;
 
 typedef struct {

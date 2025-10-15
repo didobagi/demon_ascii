@@ -123,6 +123,7 @@ void render_entities (FrameBuffer *fb, Camera *camera, World *world, unsigned in
 
 void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
     int sqr_size = 8;
+
     for (int screen_y = 0; screen_y < camera->height; screen_y++) {
         for (int screen_x = 0; screen_x < camera->width; screen_x++) {
             int world_x = camera->x + screen_x;
@@ -132,6 +133,9 @@ void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
                 buffer_draw_char(fb, screen_x + 1, screen_y + 1, '.', COLOR_BLACK);
                 continue;
             }
+
+            float distance = world_get_distance_from_viewer(world, world_x, world_y,
+                                                            world->viewer_x, world->viewer_y);
 
             TerrainType terrain = world_get_terrain(world, world_x, world_y);
             
@@ -158,6 +162,25 @@ void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
                 get_check(world_x, world_y, sqr_size, &ch, &color);
             }
             
+            //gradient for FOV
+            float fade_start = world->view_radius - 4.2f;
+            float fade_end = world->view_radius;
+            if (distance > fade_start) {
+                float fade = (distance - fade_start) / (fade_end - fade_start);
+                fade = fade < 0.0f ? 0.0f : (fade > 1.0f ? 1.0f : fade);
+                if (fade > 0.75f) {
+                    ch = '.';
+                }
+                else if (fade > 0.5f) {
+                    color = COLOR_BRIGHT_BLACK;
+                    ch = ':';
+                }
+                else if (fade > 0.5f) {
+                    color = COLOR_BLACK;
+                    ch = '*';
+                }
+            }
+
             buffer_draw_char(fb, screen_x + 1, screen_y + 1, ch, color);
         }
     }

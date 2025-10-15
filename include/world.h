@@ -15,4 +15,5 @@ int world_entity_in_region (World *world, int min_x,int min_y, int max_x,
                             int max_y, GameObject **buffer, int max_count);
 void world_update_visibility (World *world, int viewer_x, int viewer_y, int radius);
 bool world_is_visible (World *world, int x, int y);
+float world_get_distance_from_viewer(World *world, int x, int y, int viewer_x, int viewer_y);
 #endif
