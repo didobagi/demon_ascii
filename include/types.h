@@ -42,6 +42,11 @@ typedef enum {
 } TextureType;
 
 typedef enum {
+    ENEMY_TYPE_BONOBO,
+    ENEMY_TYPE_EYE,
+} EnemyType;
+
+typedef enum {
     AI_STATE_IDLE,
     AI_STATE_ALERT,
     AI_STATE_PURSUE,
@@ -188,6 +193,7 @@ typedef struct {
     int width;
     int height;
     Cell *grid;
+    bool *visibility;
 } World;
 
 typedef struct {

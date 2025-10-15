@@ -37,12 +37,12 @@ static GameObject* create_enemy(int world_x, int world_y) {
 
     enemy->color = COLOR_YELLOW;
 
-    enemy->anim_idle_frames = monkey_idle_frames;
-    enemy->anim_idle_frame_counts = monkey_idle_frame_counts;
-    enemy->anim_idle_total_frames = monkey_idle_total_frames;
-    enemy->anim_walk_frames = monkey_walk_frames;
-    enemy->anim_walk_frame_counts = monkey_walk_frame_counts;
-    enemy->anim_walk_total_frames = monkey_walk_total_frames;
+    enemy->anim_idle_frames = bonobo_idle_frames;
+    enemy->anim_idle_frame_counts = bonobo_idle_frame_counts;
+    enemy->anim_idle_total_frames = bonobo_idle_total_frames;
+    enemy->anim_walk_frames = bonobo_walk_frames;
+    enemy->anim_walk_frame_counts = bonobo_walk_frame_counts;
+    enemy->anim_walk_total_frames = bonobo_walk_total_frames;
     enemy->shape.texture = TEXTURE_SOLID;
 
 

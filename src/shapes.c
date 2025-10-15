@@ -182,6 +182,8 @@ Point carachter_breathe_frame4[] = {
     {-4, 4}, {-1, 4}, {3, 4}
 };
 
+
+
 const int carachter_breathe_frame0_count = sizeof(carachter_breathe_frame0)/sizeof(Point);
 const int carachter_breathe_frame1_count = sizeof(carachter_breathe_frame1)/sizeof(Point);
 const int carachter_breathe_frame2_count = sizeof(carachter_breathe_frame2)/sizeof(Point);
@@ -211,6 +213,84 @@ int carachter_breathe_frame_counts[] = {
 };
 
 const int carachter_breathe_total_frames = 8; 
+
+// Animation: carachter_walk
+// Frames: 4
+
+Point carachter_walk_frame0[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-4, 2}, {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2},
+    {-4, 3}, {-1, 3}, {3, 3},
+    {-4, 4}, {-1, 4}, {3, 4}
+};
+Point carachter_walk_frame1[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-4, 2}, {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2}, {3, 2},
+    {-4, 3}, {-3, 3}, {-1, 3}, {3, 3},
+    {-4, 4}, {-3, 4}, {-1, 4}, {3, 4}, {4, 4}
+};
+Point carachter_walk_frame2[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, {0, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-3, 1}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-3, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2}, {3, 2}, {4, 2},
+    {-2, 3}, {0, 3}, {4, 3},
+    {-2, 4}, {0, 4}, {4, 4}
+};
+Point carachter_walk_frame3[] = {
+    {-4, -5}, {3, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-2, -3}, {-1, -3}, {0, -3}, {1, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2},
+    {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1},
+    {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0},
+    {-2, 1}, {-1, 1}, {0, 1}, {1, 1},
+    {-2, 2}, {-1, 2}, {0, 2}, {1, 2}, {2, 2}, {3, 2},
+    {-2, 3}, {0, 3}, {3, 3},
+    {-2, 4}, {0, 4}, {3, 4}
+};
+const int carachter_walk_frame0_count = sizeof(carachter_walk_frame0)/sizeof(Point);
+const int carachter_walk_frame1_count = sizeof(carachter_walk_frame1)/sizeof(Point);
+const int carachter_walk_frame2_count = sizeof(carachter_walk_frame2)/sizeof(Point);
+const int carachter_walk_frame3_count = sizeof(carachter_walk_frame3)/sizeof(Point);
+
+// Array of frame pointers
+Point* carachter_walk_frames[] = {
+    carachter_walk_frame0,
+    carachter_walk_frame1,
+    carachter_walk_frame2,
+    carachter_walk_frame3,
+    carachter_walk_frame2,
+    carachter_walk_frame1,
+};
+
+// Array of frame counts
+int carachter_walk_frame_counts[] = {
+    carachter_walk_frame0_count,
+    carachter_walk_frame1_count,
+    carachter_walk_frame2_count,
+    carachter_walk_frame3_count,
+    carachter_walk_frame2_count,
+    carachter_walk_frame1_count,
+};
+
+const int carachter_walk_total_frames = 6;
 
 // Monkey walking animation
 Point monkey_walk_frame0[] = {
@@ -351,3 +431,161 @@ int monkey_idle_frame_counts[] = {
 };
 
 const int monkey_idle_total_frames = 1;
+
+// Animation: bonobo_idle
+// Frames: 4
+
+Point bonobo_idle_frame0[] = {
+    {-4, -5}, {-3, -5}, {-2, -5}, {-1, -5}, {0, -5},
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4},
+    {-5, -3}, {-4, -3}, {-2, -3}, {-1, -3}, {1, -3},
+    {-4, -2}, {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2}, {3, -2},
+    {-5, -1}, {-4, -1}, {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {3, -1}, {4, -1},
+    {-5, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {4, 0},
+    {-5, 1}, {-3, 1}, {1, 1}, {2, 1}, {4, 1},
+    {-4, 2}, {3, 2},
+    {-4, 3}, {3, 3},
+    {-3, 4}, {3, 4}
+};
+Point bonobo_idle_frame1[] = {
+    {-3, -5}, {-2, -5}, {-1, -5}, {0, -5}, {1, -5},
+    {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4},
+    {-3, -3}, {-1, -3}, {0, -3}, {2, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {2, -2},
+    {-5, -1}, {-4, -1}, {-3, -1}, {-2, -1}, {0, -1}, {1, -1}, {2, -1}, {3, -1}, {4, -1},
+    {-5, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0}, {4, 0},
+    {-5, 1}, {-3, 1}, {1, 1}, {2, 1}, {4, 1},
+    {-4, 2}, {3, 2},
+    {-4, 3}, {3, 3},
+    {-3, 4}, {3, 4}
+};
+Point bonobo_idle_frame2[] = {
+    {-3, -5}, {-2, -5}, {-1, -5}, {0, -5}, {1, -5},
+    {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4},
+    {-3, -3}, {-2, -3}, {0, -3}, {1, -3}, {3, -3},
+    {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {3, -2},
+    {-5, -1}, {-4, -1}, {-3, -1}, {-2, -1}, {0, -1}, {1, -1}, {2, -1}, {3, -1}, {4, -1},
+    {-5, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0},
+    {-5, 1}, {-3, 1}, {1, 1}, {2, 1}, {4, 1},
+    {-4, 2}, {3, 2},
+    {-4, 3}, {3, 3},
+    {-3, 4}, {3, 4}
+};
+Point bonobo_idle_frame3[] = {
+    {-3, -5}, {-2, -5}, {-1, -5}, {0, -5}, {1, -5},
+    {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4}, {3, -4}, {4, -4},
+    {-3, -3}, {-2, -3}, {0, -3}, {1, -3}, {2, -3}, {4, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2}, {3, -2}, {4, -2},
+    {-5, -1}, {-3, -1}, {2, -1}, {3, -1}, {4, -1},
+    {-5, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0},
+    {-3, 1}, {1, 1}, {2, 1},
+    {-4, 2}, {3, 2},
+    {-4, 3}, {3, 3},
+    {-3, 4}, {3, 4}
+};
+const int bonobo_idle_frame0_count = sizeof(bonobo_idle_frame0)/sizeof(Point);
+const int bonobo_idle_frame1_count = sizeof(bonobo_idle_frame1)/sizeof(Point);
+const int bonobo_idle_frame2_count = sizeof(bonobo_idle_frame2)/sizeof(Point);
+const int bonobo_idle_frame3_count = sizeof(bonobo_idle_frame3)/sizeof(Point);
+
+// Array of frame pointers
+Point* bonobo_idle_frames[] = {
+    bonobo_idle_frame0,
+    bonobo_idle_frame1,
+    bonobo_idle_frame2,
+    bonobo_idle_frame3,
+    bonobo_idle_frame2,
+    bonobo_idle_frame1,
+};
+
+// Array of frame counts
+int bonobo_idle_frame_counts[] = {
+    bonobo_idle_frame0_count,
+    bonobo_idle_frame1_count,
+    bonobo_idle_frame2_count,
+    bonobo_idle_frame3_count,
+    bonobo_idle_frame2_count,
+    bonobo_idle_frame1_count,
+};
+
+const int bonobo_idle_total_frames = 6;
+
+
+// Animation: bonobo_walk
+// Frames: 4
+
+Point bonobo_walk_frame0[] = {
+    {-4, -5}, {-3, -5}, {-2, -5}, {-1, -5}, {0, -5},
+    {-5, -4}, {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4},
+    {-5, -3}, {-4, -3}, {-2, -3}, {-1, -3}, {1, -3},
+    {-4, -2}, {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2}, {3, -2},
+    {-5, -1}, {-4, -1}, {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {3, -1}, {4, -1},
+    {-5, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {4, 0},
+    {-5, 1}, {-3, 1}, {1, 1}, {2, 1}, {4, 1},
+    {-4, 2}, {3, 2},
+    {-4, 3}, {3, 3},
+    {-3, 4}, {3, 4}
+};
+Point bonobo_walk_frame1[] = {
+    {-3, -5}, {-2, -5}, {-1, -5}, {0, -5}, {1, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {1, -4}, {2, -4},
+    {-5, -3}, {-4, -3}, {-3, -3}, {-1, -3}, {1, -3}, {2, -3}, {3, -3}, {4, -3},
+    {-4, -2}, {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2}, {4, -2},
+    {-5, -1}, {-4, -1}, {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {4, -1},
+    {-5, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {4, 0},
+    {-5, 1}, {-2, 1}, {1, 1}, {2, 1},
+    {-3, 2}, {-2, 2}, {3, 2},
+    {-4, 3}, {3, 3},
+    {-3, 4}, {2, 4}
+};
+Point bonobo_walk_frame2[] = {
+    {-3, -5}, {-2, -5}, {-1, -5}, {0, -5}, {1, -5}, {2, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {2, -4},
+    {-4, -3}, {-3, -3}, {-1, -3}, {0, -3}, {2, -3}, {3, -3}, {4, -3},
+    {-4, -2}, {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2}, {4, -2},
+    {-5, -1}, {-4, -1}, {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1}, {4, -1},
+    {-5, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {4, 0},
+    {-5, 1}, {-2, 1}, {1, 1}, {2, 1},
+    {-3, 2}, {-2, 2}, {2, 2},
+    {-3, 3}, {2, 3},
+    {-3, 4}, {2, 4}
+};
+Point bonobo_walk_frame3[] = {
+    {-3, -5}, {-2, -5}, {-1, -5}, {0, -5}, {1, -5}, {2, -5},
+    {-4, -4}, {-3, -4}, {-2, -4}, {-1, -4}, {0, -4}, {2, -4},
+    {-4, -3}, {-3, -3}, {-1, -3}, {0, -3}, {2, -3},
+    {-5, -2}, {-4, -2}, {-3, -2}, {-2, -2}, {-1, -2}, {0, -2}, {1, -2}, {2, -2}, {3, -2}, {4, -2},
+    {-5, -1}, {-4, -1}, {-3, -1}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1}, {2, -1}, {4, -1},
+    {-5, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {0, 0}, {1, 0}, {4, 0},
+    {-2, 1}, {1, 1}, {3, 1}, {4, 1},
+    {-2, 2}, {0, 2}, {1, 2},
+    {-4, 3}, {-3, 3}, {-2, 3}, {0, 3},
+    {-4, 4}, {0, 4}
+};
+const int bonobo_walk_frame0_count = sizeof(bonobo_walk_frame0)/sizeof(Point);
+const int bonobo_walk_frame1_count = sizeof(bonobo_walk_frame1)/sizeof(Point);
+const int bonobo_walk_frame2_count = sizeof(bonobo_walk_frame2)/sizeof(Point);
+const int bonobo_walk_frame3_count = sizeof(bonobo_walk_frame3)/sizeof(Point);
+
+// Array of frame pointers
+Point* bonobo_walk_frames[] = {
+    bonobo_walk_frame0,
+    bonobo_walk_frame1,
+    bonobo_walk_frame2,
+    bonobo_walk_frame3,
+    bonobo_walk_frame2,
+    bonobo_walk_frame2,
+};
+
+// Array of frame counts
+int bonobo_walk_frame_counts[] = {
+    bonobo_walk_frame0_count,
+    bonobo_walk_frame1_count,
+    bonobo_walk_frame2_count,
+    bonobo_walk_frame3_count,
+    bonobo_walk_frame2_count,
+    bonobo_walk_frame1_count,
+};
+
+const int bonobo_walk_total_frames = 6;
+

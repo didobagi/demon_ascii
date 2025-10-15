@@ -76,7 +76,7 @@ void render_entity (FrameBuffer *fb, Camera *camera, GameObject *entity, unsigne
 
             switch (entity->shape.texture) {
                 case TEXTURE_SOLID:
-                    ch = '*';
+                    ch = '^';
                     break;
                 case TEXTURE_GRADIENT:
                     ch = get_char_for_distance(entity->shape.distances[i]);
@@ -111,6 +111,12 @@ void render_entities (FrameBuffer *fb, Camera *camera, World *world, unsigned in
                                               camera->x + camera->width, camera->y + camera->height,
                                               visible_entities, 100);
     for (int i = 0;i < entity_count;i ++) {
+        GameObject *entity = visible_entities[i];
+
+        if (!world_is_visible(world, entity->cell_x, entity->cell_y)) {
+            continue;
+        }
+
         render_entity(fb, camera, visible_entities[i], frame);
     }
 }
@@ -122,6 +128,11 @@ void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
             int world_x = camera->x + screen_x;
             int world_y = camera->y + screen_y;
             
+            if (!world_is_visible(world, world_x, world_y)) {
+                buffer_draw_char(fb, screen_x + 1, screen_y + 1, '.', COLOR_BLACK);
+                continue;
+            }
+
             TerrainType terrain = world_get_terrain(world, world_x, world_y);
             
             char ch;

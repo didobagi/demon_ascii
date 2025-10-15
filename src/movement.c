@@ -44,11 +44,11 @@ bool movement_try_mov (GameObject *entity, World *world, int dx, int dy) {
     entity->is_moving = true;
 
 
-if (entity->entity_type == ENTITY_PLAYER) {
-    animation_switch_to(entity, ANIM_STATE_WALK, 0.3f); // WALK when moving!
-} else if (entity->entity_type == ENTITY_ENEMY) {
-    animation_switch_to(entity, ANIM_STATE_WALK, entity->animation_speed); // WALK when moving!
-}
+    if (entity->entity_type == ENTITY_PLAYER) {
+        animation_switch_to(entity, ANIM_STATE_WALK, 0.3f); 
+    } else if (entity->entity_type == ENTITY_ENEMY) {
+        animation_switch_to(entity, ANIM_STATE_WALK, entity->animation_speed);
+    }
     
     if (dx != 0) {
         if (entity->entity_type == ENTITY_PLAYER) {

@@ -19,11 +19,20 @@ World* create_world (int width, int height) {
         free(world);
         return NULL;
     }
+    //basic fog
+    world->visibility = malloc(sizeof(bool) * total_cells);
+    if (!world->visibility) {
+        free(world->grid);
+        free(world);
+        return NULL;
+    }
+
     for (int i = 0;i < total_cells;i ++) {
         world->grid[i].terrain = TERRAIN_WALL;
         world->grid[i].entities = NULL;
         world->grid[i].entity_capacity = 0;
         world->grid[i].entity_count = 0;
+        world->visibility[i] = false;
     }
     return world;
 }
@@ -41,7 +50,7 @@ void destroy_world (World *world) {
         }
     }
     free(world->grid);
-
+    free(world->visibility);
     free(world);
 }
 
@@ -141,4 +150,36 @@ int world_entity_in_region (World *world, int min_x,int min_y, int max_x,
         }
     }
     return fount_count;
+}
+void world_update_visibility(World *world, int viewer_x, int viewer_y, int radius) {
+    int total_cells = world->width * world->height;
+    for (int i = 0;i < total_cells;i ++) {
+        world->visibility[i] = false;
+    }
+
+
+    for (int dy = -radius;dy <= radius;dy ++) {
+        for (int dx = -radius;dx <= radius;dx ++) {
+            float distance = sqrt((float)dx*dx + dy*dy);
+
+            if (distance < (float)radius) {
+                int tx = viewer_x + dx;
+                int ty = viewer_y + dy;
+
+                if (tx >= 0 && tx < world->width &&
+                    ty >= 0 && ty < world->height) {
+                    int index = ty * world->width + tx;
+                    world->visibility[index] = true;
+                }
+            }
+        }
+    }
+}
+
+bool world_is_visible(World *world, int x, int y) {
+    if (x < 0 || x >= world->width || y < 0 || y >= world->height) {
+        return false;
+    }
+    int index = y * world->width + x;
+    return world->visibility[index];
 }
