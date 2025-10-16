@@ -69,15 +69,23 @@ DungeonModeData* dungeon_mode_create(GameState *game_state) {
     memset(&data->player, 0, sizeof(GameObject));
     data->player.entity_type = ENTITY_PLAYER;
     data->player.active = true;
-    
-    if (data->gen_result.room_count > 0) {
-        data->player.cell_x = data->gen_result.rooms[0].center_x;
-        data->player.cell_y = data->gen_result.rooms[0].center_y;
+
+    int spawn_x, spawn_y;
+    if (find_player_spawn_position(data->world, &data->gen_result, 
+                data->template_library, &spawn_x, &spawn_y)) {
+        data->player.cell_x = spawn_x;
+        data->player.cell_y = spawn_y;
     } else {
-        data->player.cell_x = WORLD_WIDTH / 2;
-        data->player.cell_y = WORLD_HEIGHT / 2;
+        // Fallback to first room center if no @ marker found
+        if (data->gen_result.room_count > 0) {
+            data->player.cell_x = data->gen_result.rooms[0].center_x;
+            data->player.cell_y = data->gen_result.rooms[0].center_y;
+        } else {
+            data->player.cell_x = WORLD_WIDTH / 2;
+            data->player.cell_y = WORLD_HEIGHT / 2;
+        }
     }
-    
+
     data->player.v_x = (float)data->player.cell_x;
     data->player.v_y = (float)data->player.cell_y;
     data->player.color = COLOR_RED;
@@ -159,26 +167,46 @@ void dungeon_handle_player_command(DungeonModeData *data, PlayerCommand cmd) {
     }
     if (movement_try_mov(&data->player, data->world, dx, dy)) {
         data->moved_this_frame = true;
+
         for (int i = 0; i < data->enemy_count; i++) {
             GameObject *enemy = data->all_enemies[i];
             if (enemy && enemy->active) {
                 int dist_x = abs(enemy->cell_x - data->player.cell_x);
                 int dist_y = abs(enemy->cell_y - data->player.cell_y);
 
-                // Trigger if within 1 tile (including diagonals)
-                if (dist_x <= 1 && dist_y <= 1) {
-                    data->game_state->dialogue_enemy = enemy;
-                    data->game_state->dialogue_player = &data->player;
-                    game_state_transition_to(data->game_state, GAME_MODE_DIALOGUE);
-                    return;                }
+                if (dist_x <= 4 && dist_y <= 4) {
+                    data->player.v_x = (float)data->player.cell_x;
+                    data->player.v_y = (float)data->player.cell_y;
+                    data->player.is_moving = false;
+
+                    data->state = DUNGEON_STATE_TRANSITIONING;
+                    data->transition_timer = 1.5f;
+                    data->transition_target = GAME_MODE_DIALOGUE;
+                    data->transition_enemy = enemy;
+                    return;
+                }
             }
         }
     }
 }
 
+
 void dungeon_mode_update(DungeonModeData *data, PlayerCommand cmd, float delta_time) {
     data->frame++;
     data->moved_this_frame = false;
+
+    if (data->state == DUNGEON_STATE_TRANSITIONING) {
+        data->transition_timer -= delta_time;
+
+        if (data->transition_timer <= 0.0f) {
+            data->game_state->dialogue_enemy = data->transition_enemy;
+            data->game_state->dialogue_player = &data->player;
+            game_state_transition_to(data->game_state, data->transition_target);
+            return;
+        }
+
+        return;
+    }
 
     if (cmd == CMD_COMBAT_TEST) {
     data->game_state->dialogue_enemy = data->enemy_count > 0 ? data->all_enemies[0] : NULL;
@@ -195,16 +223,34 @@ void dungeon_mode_update(DungeonModeData *data, PlayerCommand cmd, float delta_t
     
     //Update vis after player move
     world_update_visibility(data->world, data->player.cell_x, data->player.cell_y, 31);
-    
+
+    // Update enemies
     // Update enemies
     for (int i = 0; i < data->enemy_count; i++) {
         if (data->all_enemies[i] && data->all_enemies[i]->active) {
             enemy_ai_update(data->all_enemies[i], &data->player, data->world, delta_time);
             animation_update(data->all_enemies[i], delta_time);
             movement_update(data->all_enemies[i], delta_time);
+
+            // Check if enemy moved into player range
+            GameObject *enemy = data->all_enemies[i];
+            int dist_x = abs(enemy->cell_x - data->player.cell_x);
+            int dist_y = abs(enemy->cell_y - data->player.cell_y);
+
+            if (dist_x <= 2 && dist_y <= 2) {
+                data->player.v_x = (float)data->player.cell_x;
+                data->player.v_y = (float)data->player.cell_y;
+                data->player.is_moving = false;
+
+                data->state = DUNGEON_STATE_TRANSITIONING;
+                data->transition_timer = 1.5f;
+                data->transition_target = GAME_MODE_DIALOGUE;
+                data->transition_enemy = enemy;
+                return;
+            }
         }
     }
-    
+
     // Update camera
     camera_follow_entity_smooth(&data->camera, &data->player, 
                                data->world->width, data->world->height);
@@ -217,6 +263,27 @@ void dungeon_mode_update(DungeonModeData *data, PlayerCommand cmd, float delta_t
 }
 
 void dungeon_mode_render(DungeonModeData *data, FrameBuffer *fb) {
+    Camera render_camera = data->camera;
+
+    if (data->state == DUNGEON_STATE_TRANSITIONING) {
+        int shake_intensity = 13;
+        int shake_x = (rand() % (shake_intensity * 2 + 1)) - shake_intensity;
+        int shake_y = (rand() % (shake_intensity * 2 + 1)) - shake_intensity;
+
+        render_camera.x += shake_x;
+        render_camera.y += shake_y;
+    }
+
+    render_world(fb, data->world, &render_camera, data->frame);
+
+    if (data->state == DUNGEON_STATE_TRANSITIONING) {
+        int mid_x = data->camera.width / 2;
+        int mid_y = data->camera.height / 2;
+
+        char timer_text[32];
+        snprintf(timer_text, sizeof(timer_text), "! %.1f !", data->transition_timer);
+        draw_text_centered(fb, mid_y, timer_text, COLOR_RED);
+    }
     render_world(fb, data->world, &data->camera, data->frame);
 }
 

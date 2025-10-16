@@ -413,4 +413,27 @@ SpawnResult spawn_all_enemies(World *world, MapGenResult *gen_result, TemplateLi
     return result;
 }
 
-
+bool find_player_spawn_position(World *world, MapGenResult *gen_result, 
+                                TemplateLibrary *library, int *out_x, int *out_y) {
+    for (int i = 0; i < gen_result->room_count; i++) {
+        PlacedRoom *room = &gen_result->rooms[i];
+        
+        Template *template = get_template_by_name(library, room->name);
+        if (!template) continue;
+        
+        for (int ty = 0; ty < template->height; ty++) {
+            for (int tx = 0; tx < template->width; tx++) {
+                int template_index = ty * template->width + tx;
+                MarkerType marker = template->markers[template_index];
+                
+                if (marker == MARKER_PLAYER_START) {
+                    *out_x = room->x + tx;
+                    *out_y = room->y + ty;
+                    return true;
+                }
+            }
+        }
+    }
+    
+    return false;
+}

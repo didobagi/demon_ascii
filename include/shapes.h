@@ -5,6 +5,8 @@
 //background
 extern Point combat_arena_background[];
 extern const int combat_arena_background_count;
+extern Point combat_arena_background_2[];
+extern const int combat_arena_background_count_2;
 
 
 

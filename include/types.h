@@ -288,6 +288,8 @@ typedef struct {
     
     GameObject *dialogue_enemy;
     GameObject *dialogue_player;
+        
+    bool start_transition;
 } GameState;
 
 #endif

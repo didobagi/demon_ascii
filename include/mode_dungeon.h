@@ -10,6 +10,10 @@
 #include "input.h"
 #include "game_state.h"
 
+typedef enum {
+    DUNGEON_STATE_PLAYING,
+    DUNGEON_STATE_TRANSITIONING,
+} DungeonState;
 
 typedef struct DungeonModeData {
     World *world;
@@ -29,6 +33,10 @@ typedef struct DungeonModeData {
     
     GameState *game_state;
     
+    DungeonState state;
+    float transition_timer;
+    GameMode transition_target;
+    GameObject *transition_enemy;
 } DungeonModeData;
 
 DungeonModeData* dungeon_mode_create(GameState *game_state);

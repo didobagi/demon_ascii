@@ -42,4 +42,6 @@ void free_map_gen_result (MapGenResult *result);
 SpawnResult spawn_enemies_in_room(World *world, PlacedRoom *room, Template *templ);
 
 SpawnResult spawn_all_enemies(World *world, MapGenResult *gen_result, TemplateLibrary *library);
+bool find_player_spawn_position(World *world, MapGenResult *gen_result, 
+                                TemplateLibrary *library, int *out_x, int *out_y);
 #endif

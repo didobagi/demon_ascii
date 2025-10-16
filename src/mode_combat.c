@@ -132,6 +132,13 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
     int art_offset_x = -art_width / 2;
     int art_offset_y = -art_height / 2;
 
+    for (int i = 0; i < combat_arena_background_count_2; i++) {
+        int point_x = screen_center_x + combat_arena_background_2[i].x + art_offset_x;
+        int point_y = screen_center_y + combat_arena_background_2[i].y + art_offset_y;
+
+        buffer_draw_char(fb, point_x, point_y, '.', COLOR_BRIGHT_WHITE);
+    }
+
     for (int i = 0; i < combat_arena_background_count; i++) {
         int point_x = screen_center_x + combat_arena_background[i].x + art_offset_x;
         int point_y = screen_center_y + combat_arena_background[i].y + art_offset_y;
@@ -188,9 +195,17 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
     
     int ui_bottom_y = frame_y + frame_height + 1;
     draw_text_centered(fb, ui_bottom_y,
-                      "Arrow keys: select | Space: action | Q: exit", 
+                      "| Arrow keys: select | Space: action | Q: exit |", 
                       COLOR_BRIGHT_BLACK);
     
+    draw_text_centered(fb, ui_bottom_y + 1,
+                      "-----------------------------------------------", 
+                      COLOR_BRIGHT_BLACK);
+
+    draw_text_centered(fb, ui_bottom_y - 1,
+                      "-----------------------------------------------", 
+                      COLOR_BRIGHT_BLACK);
+
     if (data->selected_unit_index >= 0 && data->selected_unit_index < data->player_count) {
         CombatUnit *unit = &data->player_units[data->selected_unit_index];
         char info[64];
@@ -198,6 +213,4 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
                 unit->current_hp, unit->max_hp, unit->move_range, unit->weapon_range);
         draw_text_centered(fb, ui_bottom_y + 1, info, COLOR_CYAN);
     }
-    
-    present_frame(fb);
 }

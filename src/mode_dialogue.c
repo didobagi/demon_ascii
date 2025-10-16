@@ -162,37 +162,31 @@ static DialogueFragment* generate_initial_fragment(DialogueModeData *data) {
 
 static void handle_choice_selection(DialogueModeData *data, int choice_index) {
     DialogueChoice *choice = &data->current_fragment->choices[choice_index];
-    
+
     if (choice->is_endpoint) {
-        // Set up the result in game state
         data->game_state->dialogue_result.active = true;
-        
+
         switch (choice->outcome.type) {
             case OUTCOME_END_COMBAT:
                 data->game_state->dialogue_result.target_mode = GAME_MODE_TURN_BASED_COMBAT;
+                data->game_state->start_transition = true;
                 break;
             case OUTCOME_END_PUZZLE:
-                // For now go back to dungeon since puzzle mode doesn't exist yet
                 data->game_state->dialogue_result.target_mode = GAME_MODE_DUNGEON_EXPLORATION;
+                game_state_transition_to(data->game_state, data->game_state->dialogue_result.target_mode);
                 break;
             case OUTCOME_END_DEXTERITY:
-                // For now go back to dungeon since dexterity mode doesn't exist yet
                 data->game_state->dialogue_result.target_mode = GAME_MODE_DUNGEON_EXPLORATION;
+                game_state_transition_to(data->game_state, data->game_state->dialogue_result.target_mode);
                 break;
             case OUTCOME_END_PEACEFUL:
                 data->game_state->dialogue_result.target_mode = GAME_MODE_DUNGEON_EXPLORATION;
+                game_state_transition_to(data->game_state, data->game_state->dialogue_result.target_mode);
                 break;
             default:
-                data->game_state->dialogue_result.target_mode = GAME_MODE_DUNGEON_EXPLORATION;
+                game_state_transition_to(data->game_state, GAME_MODE_DUNGEON_EXPLORATION);
                 break;
-        }
-        
-        data->game_state->dialogue_result.difficulty = choice->outcome.difficulty;
-        data->game_state->dialogue_result.context_flags = choice->outcome.context_flags;
-        
-        // Trigger transition
-        game_state_transition_to(data->game_state, data->game_state->dialogue_result.target_mode);
-        
+        } 
     } else {
         // Continue to next fragment - find it by ID
         for (int i = 0; i < data->fragment_pool_size; i++) {

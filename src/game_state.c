@@ -8,6 +8,45 @@
 #include <stdio.h>
 #include <string.h>
 
+static bool is_transitioning = false;
+static float transition_progress = 0.0f;
+static FrameBuffer transition_source;
+static FrameBuffer transition_target;
+static GameMode transition_to_mode;
+
+static void render_dissolve_transition(GameState *state, FrameBuffer *output) {
+    float threshold = transition_progress;
+    
+    float shake_intensity = (1.0f - transition_progress) * 5.0f;
+    int shake_x = (rand() % (int)(shake_intensity * 2 + 1)) - (int)shake_intensity;
+    int shake_y = (rand() % (int)(shake_intensity * 2 + 1)) - (int)shake_intensity;
+    
+    for (int y = 0; y < state->term_height; y++) {
+        for (int x = 0; x < state->term_width; x++) {
+            //create unique "seed" mult by primes to ensure good distribution
+            //same position always generate same seed?
+            int seed = x * 73 + y * 137;
+            float pixel_threshold = (float)(seed % 1000) / 1000.0f;
+            
+            int source_x = x + shake_x;
+            int source_y = y + shake_y;
+            
+            if (source_x < 0) source_x = 0;
+            if (source_x >= state->term_width) source_x = state->term_width - 1;
+            if (source_y < 0) source_y = 0;
+            if (source_y >= state->term_height) source_y = state->term_height - 1;
+            
+            if (pixel_threshold < threshold) {
+                output->cells[y][x] = transition_target.cells[source_y][source_x];
+                output->colors[y][x] = transition_target.colors[source_y][source_x];
+            } else {
+                output->cells[y][x] = transition_source.cells[source_y][source_x];
+                output->colors[y][x] = transition_source.colors[source_y][source_x];
+            }
+        }
+    }
+}
+
 GameState* game_state_create(int term_width, int term_height) {
     GameState *state = malloc(sizeof(GameState));
     if (!state) return NULL;
@@ -32,7 +71,8 @@ GameState* game_state_create(int term_width, int term_height) {
     
     // Initialize dungeon mode (starting mode)
     state->dungeon_data = dungeon_mode_create(state);
-    
+
+    state->start_transition = false;
     return state;
 }
 
@@ -124,7 +164,49 @@ void game_state_update_transition(GameState *state) {
 }
 
 void game_state_update(GameState *state, PlayerCommand cmd, float delta_time) {
-    // Dispatch to active mode
+    if (cmd == CMD_QUIT) {
+        state->current_mode = GAME_MODE_QUIT;
+        return;
+    }
+    if (is_transitioning) {
+        transition_progress += delta_time * 0.7f;
+        
+        if (transition_progress >= 1.0f) {
+            is_transitioning = false;
+            transition_progress = 0.0f;
+            game_state_transition_to(state, transition_to_mode);
+        }
+        return;
+    }
+    
+    if (state->start_transition) {
+        is_transitioning = true;
+        transition_progress = 0.0f;
+        transition_to_mode = state->dialogue_result.target_mode;
+        
+        init_frame_buffer(&transition_source, state->term_width, state->term_height);
+        init_frame_buffer(&transition_target, state->term_width, state->term_height);
+
+        switch (state->current_mode) {
+            case GAME_MODE_DIALOGUE:
+                dialogue_mode_render(state->dialogue_data, &transition_source);
+                break;
+            default:
+                break;
+        }
+        
+        state->combat_data = combat_mode_create(state);
+        combat_mode_render(state->combat_data, &transition_target);
+        
+        state->start_transition = false;
+        return;
+    }
+    
+    if (state->mode_changed) {
+        state->mode_changed = false;
+        return;
+    }
+
     switch (state->current_mode) {
         case GAME_MODE_DUNGEON_EXPLORATION:
             dungeon_mode_update(state->dungeon_data, cmd, delta_time);
@@ -139,13 +221,17 @@ void game_state_update(GameState *state, PlayerCommand cmd, float delta_time) {
             scroll_mode_update(state->scroll_data, cmd, delta_time);
             break;
         case GAME_MODE_QUIT:
-            // Nothing to update
             break;
     }
 }
 
 void game_state_render(GameState *state, FrameBuffer *fb) {
-    // Dispatch to active mode
+    if (is_transitioning) {
+        render_dissolve_transition(state, fb);
+        present_frame(fb);
+        return;
+    }
+    
     switch (state->current_mode) {
         case GAME_MODE_DUNGEON_EXPLORATION:
             dungeon_mode_render(state->dungeon_data, fb);
@@ -160,8 +246,7 @@ void game_state_render(GameState *state, FrameBuffer *fb) {
             scroll_mode_render(state->scroll_data, fb);
             break;
         case GAME_MODE_QUIT:
-            // Nothing to render
             break;
     }
+    present_frame(fb);
 }
-

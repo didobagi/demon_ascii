@@ -29,9 +29,8 @@ static void find_direction_toward (int from_x, int from_y,
     else *out_dy = 0;
 }
 
-bool enemy_try_move_toward (GameObject *enemy, int target_x, int target_y, World *world) {
-    int dx,dy;
-    find_direction_toward (enemy->cell_x, enemy->cell_y, target_x, target_y, &dx, &dy);
+bool enemy_try_move_direction (GameObject *enemy, World *world, int dx, int dy) {
+
 
     if (dx == 0 && dy == 0) {
         return false;
@@ -81,60 +80,16 @@ bool enemy_try_move_toward (GameObject *enemy, int target_x, int target_y, World
     return false;
 }
 
-bool enemy_try_flee_from(GameObject *enemy, int target_x, int target_y, World *world) {
-    
+bool enemy_try_move_toward (GameObject *enemy, int target_x, int target_y, World *world) {
     int dx, dy;
     find_direction_toward(enemy->cell_x, enemy->cell_y, target_x, target_y, &dx, &dy);
+    return enemy_try_move_direction(enemy, world, dx, dy);
+}
 
-    dx = -dx;
-    dy = -dy;
-    
-    if (dx == 0 && dy == 0) {
-        dx = (rand() % 3) - 1;
-        dy = (rand() % 3) - 1;
-    }
-
-    update_entity_facing(enemy, dx, dy);
-    if (movement_try_mov(enemy, world, dx, dy)) {
-        return true;
-    }
-    //path blocked
-
-    if (dx != 0) {
-        update_entity_facing(enemy, dx, 0);
-        if (movement_try_mov(enemy, world, dx, 0)) {
-            return true;
-        }
-    }
-    if (dy != 0) {
-        update_entity_facing(enemy, 0, dy);
-        if (movement_try_mov(enemy, world, 0, dy)) {
-            return true;
-        }
-    }
-
-    if (dx != 0) {
-        update_entity_facing(enemy, 0, 1);
-        if (movement_try_mov(enemy, world, 0, 1)) {
-            return true;
-        }
-        update_entity_facing(enemy, 0, -1);
-        if (movement_try_mov(enemy, world, 0, -1)) {
-            return true;
-        }
-    }
-    if (dy != 0) {
-        update_entity_facing(enemy, 1, 0);
-        if (movement_try_mov(enemy, world, 1, 0)) {
-            return true;
-        }
-        update_entity_facing(enemy, -1, 0);
-        if (movement_try_mov(enemy, world, -1, 0)) {
-            return true;
-        }
-    }
-
-    return false;
+bool enemy_try_flee_from(GameObject *enemy, int target_x, int target_y, World *world) {
+    int dx, dy;
+    find_direction_toward(enemy->cell_x, enemy->cell_y, target_x, target_y, &dx, &dy);
+    return enemy_try_move_direction(enemy, world, -dx, -dy);
 }
 
 bool enemy_try_wander(GameObject *enemy, World *world) {
@@ -176,7 +131,7 @@ void enemy_ai_update(GameObject *enemy, GameObject *player, World *world, float 
         case AI_STATE_ALERT:
             if (dist_to_player < ALERT_DISTANCE) {
                 enemy->alert_timer = ALERT_DURATION;
-                if (!player->in_snake_form) {
+                if (player->in_snake_form) {
                     enemy->ai_state = AI_STATE_FLEE;
                     enemy->move_speed = 1.2f;
                     enemy->animation_speed = 0.08f;
@@ -200,7 +155,7 @@ void enemy_ai_update(GameObject *enemy, GameObject *player, World *world, float 
                     }
                 }
 
-                if (!player->in_snake_form) {
+                if (player->in_snake_form) {
                     enemy->ai_state = AI_STATE_FLEE;
                 }
             } else {
