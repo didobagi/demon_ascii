@@ -6,7 +6,6 @@
 
 #include "../include/types.h"
 #include "../include/input.h"
-#include "../include/controls.h"
 #include "../include/game_state.h"
 
 #define FRAME_TIME 0.016f

@@ -5,7 +5,6 @@
 #include "game_state.h"
 #include "frame_buffer.h"
 #include "input.h"
-#include "controls.h"
 
 
 typedef struct CombatModeData {

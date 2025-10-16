@@ -1,11 +1,9 @@
 #ifndef GAME_STATE_H
 #define GAME_STATE_H
 
-#include "dialogue.h"
 #include "types.h"
 #include "frame_buffer.h"
 #include "input.h"
-#include "controls.h"
 
 
 typedef struct DungeonModeData DungeonModeData;

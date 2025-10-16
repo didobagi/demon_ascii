@@ -1,10 +1,79 @@
+#include "../include/frame_buffer.h"
 #include "../include/render.h"
 #include "../include/world.h"
 #include "../include/frame_buffer.h"
 #include "../include/camera.h"
 #include <stdio.h>
+#include <unistd.h>
 #include <math.h>
+#include <string.h>
 #include <stdlib.h>
+
+void init_frame_buffer(FrameBuffer *fb, int width, int height) {
+    fb->width = width;
+    fb->height = height;
+
+    for (int y = 0;y < height;y ++) {
+        for (int x = 0;x < width;x ++) {
+            fb->cells[y][x] = ' ';
+            fb->colors[y][x] = COLOR_BLACK;
+        }
+    }
+}
+
+void buffer_draw_char(FrameBuffer *fb, int x, int y, char c, Color color) {
+    if (x >= 1 && x <= fb->width && y >= 1 &&  y <= fb->height) {
+        fb->cells[y-1][x-1] = c;
+        fb->colors[y-1][x-1] = color;
+    }
+}
+
+void present_frame(FrameBuffer *fb) {
+    static char output_buffer[400000];
+    int pos = 0;
+    Color current_color = -1;
+
+    static const char* COLOR_CODES[] = {
+        "\033[30m", "\033[31m", "\033[32m", "\033[33m",
+        "\033[34m", "\033[35m", "\033[36m", "\033[37m",
+        "\033[90m", "\033[91m", "\033[92m", "\033[93m",
+        "\033[94m", "\033[95m", "\033[96m", "\033[97m"
+    };
+
+    for (int y = 0; y < fb->height; y++) {
+        int run_start = -1;
+        
+        for (int x = 0; x <= fb->width; x++) {              bool changed = (x < fb->width) && 
+                          (fb->cells[y][x] != fb->prev_cells[y][x] || 
+                           fb->colors[y][x] != fb->prev_colors[y][x]);
+            
+            if (changed) {
+                if (run_start == -1) {
+                    run_start = x;
+                    pos += sprintf(output_buffer + pos, "\033[%d;%dH", y + 1, x + 1);
+                }
+                
+                Color cell_color = fb->colors[y][x];
+                if (cell_color != current_color) {
+                    pos += sprintf(output_buffer + pos, "%s", COLOR_CODES[cell_color]);
+                    current_color = cell_color;
+                }
+                output_buffer[pos++] = fb->cells[y][x];
+                
+                fb->prev_cells[y][x] = fb->cells[y][x];
+                fb->prev_colors[y][x] = fb->colors[y][x];
+                
+            } else if (run_start != -1) {
+                run_start = -1;
+            }
+        }
+    }
+    
+    if (pos > 0) {
+        pos += sprintf(output_buffer + pos, "\033[0m");
+        write(STDOUT_FILENO, output_buffer, pos);
+    }
+}
 
 char get_char_for_distance (float distance) {
     if (distance < 2.0) return '*';
@@ -212,3 +281,78 @@ void draw_text_centered(FrameBuffer *fb, int y, const char *text, Color color) {
     int x = (fb->width - len) / 2 + 1;  // +1 because buffer_draw_char uses 1-indexed
     draw_text(fb, x, y, text, color);
 }
+
+#define CAMERA_LERP_SPEED 0.7f
+
+void camera_init(Camera *camera, int viewport_width, int viewport_height) {
+    camera->x_float = 0.0f;
+    camera->y_float = 0.0f;
+    camera->x = 0;
+    camera->y = 0;
+    camera->width = viewport_width;
+    camera->height = viewport_height;
+}
+
+void camera_follow_entity_smooth (Camera *camera, GameObject *entity, 
+                                  int world_width, int world_height) {
+    // Calculate where camera should be (centered on player)
+    float desired_x = entity->v_x - camera->width / 2.0f;
+    float desired_y = entity->v_y - camera->height / 2.0f;
+    
+    // Clamp to world boundaries
+    if (desired_x < 0) desired_x = 0;
+    if (desired_y < 0) desired_y = 0;
+    if (desired_x + camera->width > world_width) {
+        desired_x = world_width - camera->width;
+    }
+    if (desired_y + camera->height > world_height) {
+        desired_y = world_height - camera->height;
+    }
+    
+    // Smoothly interpolate camera toward desired position
+    float dx = desired_x - camera->x_float;
+    float dy = desired_y - camera->y_float;
+    
+    camera->x_float += dx * CAMERA_LERP_SPEED;
+    camera->y_float += dy * CAMERA_LERP_SPEED;
+    
+    // Snap when very close to avoid infinite creep
+    if (fabs(dx) < 0.1f) camera->x_float = desired_x;
+    if (fabs(dy) < 0.1f) camera->y_float = desired_y;
+    
+    // Convert to integers for rendering
+    camera->x = (int)(camera->x_float + 0.5);
+    camera->y = (int)(camera->y_float + 0.5);
+}
+
+void camera_follow_entity (Camera *camera, GameObject *entity, int world_width, int world_height) {
+    camera->x = (int)entity->v_x - camera->width / 2;
+    camera->y = (int)entity->v_y - camera->height / 2;
+    
+    if (camera->x < 0) camera->x = 0;
+    if (camera->y < 0) camera->y = 0;
+    if (camera->x + camera->width > world_width) {
+        camera->x = world_width - camera->width;
+    }
+    if (camera->y + camera->height > world_height) {
+        camera->y = world_height - camera->height;
+    }
+}
+
+void camera_world_to_screen(Camera *camera, int world_x, int world_y, int *screen_x, int *screen_y) {
+    *screen_x = world_x - camera->x;
+    *screen_y = world_y - camera->y;
+}
+
+void camera_screen_to_world(Camera *camera, int screen_x, int screen_y, int *world_x, int *world_y) {
+    *world_x = screen_x + camera->x;
+    *world_y = screen_y + camera->y;
+}
+
+bool camera_is_visible(Camera *camera, int world_x, int world_y) {
+    return world_x >= camera->x && 
+           world_x < camera->x + camera->width &&
+           world_y >= camera->y && 
+           world_y < camera->y + camera->height;
+}
+

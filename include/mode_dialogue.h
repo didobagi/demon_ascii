@@ -1,9 +1,9 @@
 #ifndef MODE_DIALOGUE_H
 #define MODE_DIALOGUE_H
 
-#include "controls.h"
 #include "frame_buffer.h"
-#include "dialogue.h"
+#include "input.h"
+#include "dialogue_system.h"
 
 struct GameState;
 struct GameObject;

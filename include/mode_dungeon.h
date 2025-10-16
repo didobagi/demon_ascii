@@ -8,7 +8,6 @@
 #include "map_builder.h"
 #include "map_template.h"
 #include "input.h"
-#include "controls.h"
 #include "game_state.h"
 
 

@@ -6,6 +6,12 @@
 #include <stdbool.h>
 
 typedef struct {
+    GameObject **enemies; //array of enemy pointers
+    int count;
+} SpawnResult;
+
+
+typedef struct {
     int x, y;
     int width, height;
     int center_x, center_y;
@@ -33,4 +39,7 @@ void stamp_template_to_world(World *world, Template *templ, int x, int y);
 void carve_corridor_seg(World *world, int x1, int y1, int x2, int y2, int width);
 void free_map_gen_result (MapGenResult *result);
 
+SpawnResult spawn_enemies_in_room(World *world, PlacedRoom *room, Template *templ);
+
+SpawnResult spawn_all_enemies(World *world, MapGenResult *gen_result, TemplateLibrary *library);
 #endif

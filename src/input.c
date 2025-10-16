@@ -60,3 +60,32 @@ GameKey read_game_key(void) {
     return KEY_NONE;
 }
 
+PlayerCommand read_player_command(void) {
+    GameKey key = read_game_key();
+    
+    switch (key) {
+        case KEY_UP:
+            return CMD_MOVE_UP;
+            
+        case KEY_DOWN:
+            return CMD_MOVE_DOWN;
+            
+        case KEY_LEFT:
+            return CMD_MOVE_LEFT;
+            
+        case KEY_RIGHT:
+            return CMD_MOVE_RIGHT;
+            
+        case KEY_MORPH:
+            return CMD_MORPH;
+
+        case KEY_COMBAT_TEST:
+            return CMD_COMBAT_TEST;
+
+        case KEY_QUIT:
+            return CMD_QUIT;
+            
+        default:
+            return CMD_NONE;
+    }
+}

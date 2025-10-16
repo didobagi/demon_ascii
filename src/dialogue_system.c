@@ -1,4 +1,4 @@
-#include "../include/dialogue_library.h"
+#include "../include/dialogue_system.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

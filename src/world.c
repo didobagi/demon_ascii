@@ -1,8 +1,11 @@
 #include "../include/world.h"
-#include <math.h>
+#include "../include/map_builder.h"
+#include "../include/map_template.h"
+#include "../include/animation.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #include <string.h>
-#include <strings.h>
 
 
 World* create_world (int width, int height) {
@@ -268,3 +271,4 @@ float world_get_distance_from_viewer(World *world, int x, int y, int viewer_x, i
     int dy = y - viewer_y;
     return sqrt((float)(dx * dx + dy * dy));
 }
+
