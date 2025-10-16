@@ -297,7 +297,7 @@ static GameObject* create_enemy(int world_x, int world_y) {
     enemy->is_moving = false;
     enemy->target_v_x = enemy->v_x;
     enemy->target_v_y = enemy->v_y;
-    enemy->move_speed = 1.0f;
+    enemy->move_speed = 0.0002f;
 
 
     enemy->color = COLOR_YELLOW;

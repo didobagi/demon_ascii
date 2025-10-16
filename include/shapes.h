@@ -2,6 +2,11 @@
 #define SHAPES_H
 
 #include "types.h"
+//background
+extern Point combat_arena_background[];
+extern const int combat_arena_background_count;
+
+
 
 extern Point carachter_test_template[];
 extern Point ghost_template[];

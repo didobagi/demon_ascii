@@ -159,6 +159,20 @@ void dungeon_handle_player_command(DungeonModeData *data, PlayerCommand cmd) {
     }
     if (movement_try_mov(&data->player, data->world, dx, dy)) {
         data->moved_this_frame = true;
+        for (int i = 0; i < data->enemy_count; i++) {
+            GameObject *enemy = data->all_enemies[i];
+            if (enemy && enemy->active) {
+                int dist_x = abs(enemy->cell_x - data->player.cell_x);
+                int dist_y = abs(enemy->cell_y - data->player.cell_y);
+
+                // Trigger if within 1 tile (including diagonals)
+                if (dist_x <= 1 && dist_y <= 1) {
+                    data->game_state->dialogue_enemy = enemy;
+                    data->game_state->dialogue_player = &data->player;
+                    game_state_transition_to(data->game_state, GAME_MODE_DIALOGUE);
+                    return;                }
+            }
+        }
     }
 }
 
