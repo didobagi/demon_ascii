@@ -19,7 +19,10 @@ PlayerCommand read_player_command(void) {
             
         case KEY_MORPH:
             return CMD_MORPH;
-            
+
+        case KEY_COMBAT_TEST:
+            return CMD_COMBAT_TEST;
+
         case KEY_QUIT:
             return CMD_QUIT;
             

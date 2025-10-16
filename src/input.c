@@ -54,6 +54,7 @@ GameKey read_game_key(void) {
     if (c == 's' || c == 'S') return KEY_DOWN;
     if (c == 'a' || c == 'A') return KEY_LEFT;
     if (c == 'd' || c == 'D') return KEY_RIGHT;
+    if (c == 'c' || c == 'C') return KEY_COMBAT_TEST;
     if (c == ' ') return KEY_MORPH;
     
     return KEY_NONE;

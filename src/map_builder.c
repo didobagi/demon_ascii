@@ -247,10 +247,10 @@ MapGenResult generate_dungeon(World *world, TemplateLibrary *library, MapGenPara
 
     if (result.room_count >= params.min_rooms) {
         result.success = true;
-        printf("succesfully placed %d rooms\n", result.room_count);
+        //printf("succesfully placed %d rooms\n", result.room_count);
     } else {
-        printf("Failed to meet minimum room requirement (%d < %d)\n", 
-                result.room_count, params.min_rooms);
+        //printf("Failed to meet minimum room requirement (%d < %d)\n", 
+       //         result.room_count, params.min_rooms);
     }
 
     if (result.room_count >= 2) {

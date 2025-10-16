@@ -26,4 +26,7 @@ void render_terrain (FrameBuffer *fb, Camera *camera, World *world);
 void render_entities (FrameBuffer *fb, Camera *camera, World *world, unsigned int frame);
 void render_entity (FrameBuffer *fb, Camera *camera, GameObject *entity, unsigned int frame);
 
+
+void draw_text(FrameBuffer *fb, int x, int y, const char *text, Color color);
+void draw_text_centered(FrameBuffer *fb, int y, const char *text, Color color);
 #endif

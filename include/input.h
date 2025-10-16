@@ -8,6 +8,7 @@ typedef enum {
     KEY_LEFT = 3,
     KEY_RIGHT = 4,
     KEY_MORPH = 5,
+    KEY_COMBAT_TEST = 6,
     KEY_QUIT = 'q'
 } GameKey;
 

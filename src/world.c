@@ -73,7 +73,7 @@ TerrainType world_get_terrain (World *world, int x, int y) {
 
 bool world_is_walkable (World *world, int x, int y) {
     TerrainType terrain = world_get_terrain(world, x, y);
-    return terrain != TERRAIN_WALL;
+    return terrain != TERRAIN_WALL && terrain != TERRAIN_WATER;
 }
 
 void world_add_entity (World *world, int x,int y, GameObject *entity) {
@@ -163,7 +163,8 @@ static bool is_opaque(World *world, int x, int y) {
     if (x < 0 || x >= world->width || y < 0 || y >= world->height) {
         return true;
     }
-    return world_get_terrain(world, x, y) == TERRAIN_WALL;
+    TerrainType terrain = world_get_terrain(world, x, y);
+    return terrain == TERRAIN_WALL;
 }
 
 static void cast_light(World *world, int cx, int cy, int row,

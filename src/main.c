@@ -22,6 +22,7 @@ void init_term(int *width, int *height) {
     printf("\033[?1049h");  
     printf("\033[2J"); 
     printf("\033[?25l");
+    fflush(stdout); 
 }
 
 int main() {
@@ -43,6 +44,9 @@ int main() {
         fprintf(stderr, "Failed to create game state\n");
         if (debug_log) fclose(debug_log);
         return 1;
+    } else {
+        fprintf(debug_log, "created game %d by %d ",term_width, term_height);
+        fflush(debug_log);
     }
 
     while (game->current_mode != GAME_MODE_QUIT) {

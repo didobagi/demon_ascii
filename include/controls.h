@@ -8,6 +8,7 @@ typedef enum {
     CMD_MOVE_LEFT,
     CMD_MOVE_RIGHT,
     CMD_MORPH,
+    CMD_COMBAT_TEST,
     CMD_QUIT,
 } PlayerCommand;
 

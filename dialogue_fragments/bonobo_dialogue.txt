@@ -1,0 +1,26 @@
+ID: 0
+CONDITIONS: SNAKE_FORM
+TEXT: he who hears but does not hold learns nothing
+CHOICE: flame on earth remaining still | COMBAT | HARD
+CHOICE: saw things no one can repeat | FRAGMENT | 2
+CHOICE: his will is our peace | PEACEFUL | EASY
+---
+ID: 1
+CONDITIONS: DEMON_FORM
+TEXT: with the short vision of a span
+CHOICE: intellect sinks deep | FRAGMENT | 3
+CHOICE: all things have order | PEACEFUL | EASY
+CHOICE: dull with false imagining | PUZZLE | MEDIUM
+---
+ID: 2
+CONDITIONS: NONE
+TEXT: The sea I sail has never been passed
+CHOICE: launch vessel upon deep sea | PUZZLE | EASY
+CHOICE: rivulet descending to lowland | COMBAT | MEDIUM
+---
+ID: 3
+CONDITIONS: NONE
+TEXT: greatest gift God made in creating
+CHOICE: came with deductions to this point | COMBAT | HARD
+CHOICE: charity never shuts doors | PEACEFUL | EASY
+---

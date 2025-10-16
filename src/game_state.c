@@ -1,9 +1,11 @@
 #include "../include/game_state.h"
 #include "../include/mode_dungeon.h"
+#include "../include/mode_dialogue.h"
 #include "../include/mode_combat.h"
 #include "../include/mode_scroll.h"
 #include "../include/types.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 GameState* game_state_create(int term_width, int term_height) {
@@ -15,6 +17,11 @@ GameState* game_state_create(int term_width, int term_height) {
     state->current_mode = GAME_MODE_DUNGEON_EXPLORATION;
     state->next_mode = GAME_MODE_DUNGEON_EXPLORATION;
     state->mode_changed = false;
+
+    state->dialogue_result.active = false;
+    state->dialogue_result.target_mode = GAME_MODE_DUNGEON_EXPLORATION;
+    state->dialogue_result.difficulty = DIFFICULTY_MEDIUM;
+    state->dialogue_result.context_flags = 0;
     
     state->term_width = term_width;
     state->term_height = term_height;
@@ -65,6 +72,12 @@ void game_state_update_transition(GameState *state) {
                 state->dungeon_data = NULL;
             }
             break;
+        case GAME_MODE_DIALOGUE:
+            if (state->dialogue_data) {
+                dialogue_mode_destroy(state->dialogue_data);
+                state->dialogue_data = NULL;
+            }
+            break;
         case GAME_MODE_TURN_BASED_COMBAT:
             if (state->combat_data) {
                 combat_mode_destroy(state->combat_data);
@@ -86,6 +99,13 @@ void game_state_update_transition(GameState *state) {
         case GAME_MODE_DUNGEON_EXPLORATION:
             state->dungeon_data = dungeon_mode_create(state);
             break;
+        case GAME_MODE_DIALOGUE:
+            // For testing, pass first enemy from dungeon
+            // In real game this would be triggered by collision
+            state->dialogue_data = dialogue_mode_create(state, 
+                    state->dialogue_enemy, 
+                    state->dialogue_player);
+            break;
         case GAME_MODE_TURN_BASED_COMBAT:
             state->combat_data = combat_mode_create(state);
             break;
@@ -99,6 +119,8 @@ void game_state_update_transition(GameState *state) {
     
     state->current_mode = new_mode;
     state->mode_changed = false;
+    printf("\033[?25l");
+    fflush(stdout);
 }
 
 void game_state_update(GameState *state, PlayerCommand cmd, float delta_time) {
@@ -106,6 +128,9 @@ void game_state_update(GameState *state, PlayerCommand cmd, float delta_time) {
     switch (state->current_mode) {
         case GAME_MODE_DUNGEON_EXPLORATION:
             dungeon_mode_update(state->dungeon_data, cmd, delta_time);
+            break;
+        case GAME_MODE_DIALOGUE:
+            dialogue_mode_update(state->dialogue_data, cmd);
             break;
         case GAME_MODE_TURN_BASED_COMBAT:
             combat_mode_update(state->combat_data, cmd);
@@ -124,6 +149,9 @@ void game_state_render(GameState *state, FrameBuffer *fb) {
     switch (state->current_mode) {
         case GAME_MODE_DUNGEON_EXPLORATION:
             dungeon_mode_render(state->dungeon_data, fb);
+            break;
+        case GAME_MODE_DIALOGUE:
+            dialogue_mode_render(state->dialogue_data, fb);
             break;
         case GAME_MODE_TURN_BASED_COMBAT:
             combat_mode_render(state->combat_data, fb);

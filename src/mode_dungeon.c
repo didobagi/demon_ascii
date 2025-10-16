@@ -41,10 +41,11 @@ DungeonModeData* dungeon_mode_create(GameState *game_state) {
     
     // Load templates
     data->template_library = create_template_library();
+    Template *circle_room = load_template_from_file("templates/circle_room.txt");
     Template *large_room = load_template_from_file("templates/large_room.txt");
-    if (large_room) {
-        add_template_to_library(data->template_library, large_room);
-    }
+    if (large_room) add_template_to_library(data->template_library, large_room);
+    if (circle_room) add_template_to_library(data->template_library, circle_room);
+    
     
     // Generate dungeon
     MapGenParams params = {
@@ -164,7 +165,13 @@ void dungeon_handle_player_command(DungeonModeData *data, PlayerCommand cmd) {
 void dungeon_mode_update(DungeonModeData *data, PlayerCommand cmd, float delta_time) {
     data->frame++;
     data->moved_this_frame = false;
-    
+
+    if (cmd == CMD_COMBAT_TEST) {
+    data->game_state->dialogue_enemy = data->enemy_count > 0 ? data->all_enemies[0] : NULL;
+    data->game_state->dialogue_player = &data->player;
+    game_state_transition_to(data->game_state, GAME_MODE_DIALOGUE);
+    return;
+}
     // Handle player input
     dungeon_handle_player_command(data, cmd);
     

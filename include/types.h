@@ -75,6 +75,28 @@ typedef enum {
     ENTITY_COLLECTIBLE,
 } EntityType;
 
+typedef enum {
+    GAME_MODE_DUNGEON_EXPLORATION,
+    GAME_MODE_DIALOGUE,
+    GAME_MODE_TURN_BASED_COMBAT,
+    GAME_MODE_SIDE_SCROLL,
+    GAME_MODE_QUIT
+} GameMode;
+
+typedef enum {
+    OUTCOME_CONTINUE,
+    OUTCOME_END_COMBAT,
+    OUTCOME_END_PUZZLE,
+    OUTCOME_END_DEXTERITY,
+    OUTCOME_END_PEACEFUL
+} DialogueOutcomeType;
+
+typedef enum {
+    DIFFICULTY_EASY = 0,
+    DIFFICULTY_MEDIUM = 1,
+    DIFFICULTY_HARD = 2
+} DialogueDifficulty;
+
 typedef struct Point {
     int x;
     int y;
@@ -232,5 +254,40 @@ typedef struct KeyState {
     bool right;
     bool quit;
 } KeyState;
+
+typedef struct {
+    bool active;
+    GameMode target_mode;
+    DialogueDifficulty difficulty;
+    int context_flags;
+} DialogueResult;
+
+struct DungeonModeData;
+struct CombatModeData;
+struct DialogueModeData;
+struct ScrollModeData;
+
+typedef struct {
+    GameMode current_mode;
+    GameMode next_mode;
+    bool mode_changed;
+    
+    struct DungeonModeData *dungeon_data;
+    struct CombatModeData *combat_data;
+    struct ScrollModeData *scroll_data;
+    struct DialogueModeData *dialogue_data;
+    
+    int term_width;
+    int term_height;
+    
+    int current_level;
+    int player_max_health;
+    int player_current_health;
+    
+    DialogueResult dialogue_result;
+    
+    GameObject *dialogue_enemy;
+    GameObject *dialogue_player;
+} GameState;
 
 #endif

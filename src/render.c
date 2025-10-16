@@ -157,6 +157,9 @@ void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
                     ch = '#';  // Interior character
                     color = COLOR_BLACK;
                 }
+            } else if (terrain == TERRAIN_WATER){
+                ch = '~';
+                color = COLOR_BRIGHT_BLUE;
             } else {
                 // This is the floor - keep the checkered pattern
                 get_check(world_x, world_y, sqr_size, &ch, &color);
@@ -192,4 +195,20 @@ void render_world(FrameBuffer *fb, World *world, Camera *camera, unsigned int fr
     render_terrain(fb, camera, world);
     render_entities(fb, camera, world, frame);
     present_frame(fb);
+}
+
+void draw_text (FrameBuffer *fb, int x, int y, const char *text, Color color) {
+    int i = 0;
+    while (text[i] != '\0') {
+        buffer_draw_char(fb, x + i, y, text[i], color);
+        i ++;
+    }
+}
+
+void draw_text_centered(FrameBuffer *fb, int y, const char *text, Color color) {
+    int len = 0;
+    while (text[len] != '\0') len++;
+    
+    int x = (fb->width - len) / 2 + 1;  // +1 because buffer_draw_char uses 1-indexed
+    draw_text(fb, x, y, text, color);
 }

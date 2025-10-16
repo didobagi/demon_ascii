@@ -9,7 +9,7 @@ static TerrainType char_to_terrain (char c) {
         case '#': return TERRAIN_WALL;
         case 'W': return TERRAIN_OPTIONAL_WALL;
         case '.': return TERRAIN_FLOOR;       
-        case '~': return TERRAIN_WATER;      
+        case 'w': return TERRAIN_WATER;      
         case 'L': return TERRAIN_FIRE;
         default:
                   fprintf(stderr, "Warning: Unknown terrain character '%c', treating as floor\n", c);
@@ -184,7 +184,7 @@ Template* load_template_from_file(const char *filepath) {
     for (int i = 0; i < line_count; i++) free(lines[i]);
     free(lines);
     
-    printf("Loaded template '%s': %dx%d\n", template->name, width, height);
+    //printf("Loaded template '%s': %dx%d\n", template->name, width, height);
     return template;
 }
 
