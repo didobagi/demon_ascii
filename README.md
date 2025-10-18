@@ -1,4 +1,4 @@
-### demon ascii game
+### terminal demon ascii game
 
 ## installation:
 ```make```
@@ -8,10 +8,8 @@
 
 ### commands:
 * move with `ARROW` keys
-* `SPACE` to morph
 * `q` to quit
 
 ### TODO:
-* add damage
-* add enemies
-* puzzle?
+* add puzzle mode
+* different rendition of current combat_mode?
