@@ -17,6 +17,77 @@ static CombatUnit* get_unit_at (CombatModeData *data, int x, int y) {
     return cell ? cell->occupant : NULL;
 }
 
+static void calculate_reachable_tiles (CombatModeData *data, CombatUnit *unit) {
+    if (!data->reachable_tiles) {
+        data->reachable_tiles = malloc(sizeof(bool) * data->grid_width * data->grid_height);
+    }
+    for (int i = 0;i < data->grid_width * data->grid_height;i ++) {
+        data->reachable_tiles[i] = false;
+    }
+    data->reachable_count = 0;
+
+    //flood fill bfs algo
+    //exploring tiles layer by layer tracking distance from start
+    int *queue = malloc(sizeof(int) * data->grid_height * data-> grid_width * 3);
+    int queue_start = 0;
+    int queue_end = 0;
+    
+    queue[queue_end++] = unit->grid_x;
+    queue[queue_end++] = unit->grid_y;
+    queue[queue_end++] = 0;
+
+    int start_index = unit->grid_y * data->grid_width + unit->grid_x;
+    data->reachable_tiles[start_index] = true;
+    data->reachable_count++;
+
+    while (queue_start < queue_end) {
+        int current_x = queue[queue_start++];
+        int current_y = queue[queue_start++];
+        int current_distance = queue[queue_start++];
+
+        if (current_distance >= unit->move_range) {
+            continue;
+        }
+
+        //check all 4 adj tiles
+        int directions[4][2] = {
+            {0, -1},
+            {0, 1},
+            {-1, 0},
+            {1, 0}
+        };
+        for (int dir = 0;dir < 4;dir ++) {
+            int next_x = current_x + directions[dir][0];
+            int next_y = current_y + directions[dir][1];
+
+            if (next_x < 0 || next_x >= data->grid_width ||
+                next_y < 0 || next_y >= data->grid_height) {
+                continue;
+            }
+            CombatCell *neighbor_cell = get_cell(data, next_x, next_y);
+            if (!neighbor_cell->walkable) {
+                continue;
+            }
+            if (neighbor_cell->occupant != NULL) {
+                continue;
+            }
+
+            int neighbor_index = next_y * data->grid_width + next_x;
+            if (data->reachable_tiles[neighbor_index]) {
+                continue;
+            }
+
+            data->reachable_tiles[neighbor_index] = true;
+            data->reachable_count++;
+
+            queue[queue_end++] = next_x;
+            queue[queue_end++] = next_y;
+            queue[queue_end++] = current_distance + 1;
+        }
+    }
+    free(queue);
+}
+
 CombatModeData* combat_mode_create(GameState *game_state) {
     CombatModeData *data = malloc(sizeof(CombatModeData));
     if (!data) return NULL;
@@ -36,11 +107,19 @@ CombatModeData* combat_mode_create(GameState *game_state) {
             cell->occupant = NULL;
         }
     }
-    get_cell(data, 5, 3)->cover = COVER_HALF;
-    get_cell(data, 5, 4)->cover = COVER_HALF;
-    get_cell(data, 2, 8)->cover = COVER_FULL;
-    get_cell(data, 2, 7)->cover = COVER_FULL;
 
+    CombatCell *cover1 = get_cell(data, 5 , 3);
+    cover1->cover = COVER_HALF;
+    cover1->walkable = false;
+    CombatCell *cover2 = get_cell(data, 5 , 4);
+    cover2->cover = COVER_HALF;
+    cover2->walkable = false;
+    CombatCell *cover3 = get_cell(data, 2 , 7);
+    cover3->cover = COVER_FULL;
+    cover3->walkable = false;
+    CombatCell *cover4 = get_cell(data, 2 , 8);
+    cover4->cover = COVER_FULL;
+    cover4->walkable = false;
 
     data->player_count = 3;
     for (int i = 0;i < 3;i ++) {
@@ -86,7 +165,7 @@ CombatModeData* combat_mode_create(GameState *game_state) {
         cell->occupant = &data->enemy_units[i];
     }
     data->player_turn = true;
-    data->selected_unit_index = -1;
+    data->selected_unit_index = 0;
     data->showing_movement = false;
     data->showing_targets = false;
     data->combat_over = false;
@@ -97,6 +176,7 @@ CombatModeData* combat_mode_create(GameState *game_state) {
 void combat_mode_destroy(CombatModeData *data) {
     if (!data) return;
     if (data->grid) free(data->grid);
+    if (data->reachable_tiles) free(data->reachable_tiles);
     free(data);
 }
 
@@ -108,6 +188,39 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd) {
         return;
     }
 
+    if (!data->player_turn) {
+        return;
+    }
+
+    switch (cmd) {
+        case CMD_MOVE_LEFT:
+            data->selected_unit_index--;
+            if (data->selected_unit_index < 0) {
+                data->selected_unit_index = data->player_count - 1;
+            }
+            data->showing_movement = false;
+            break;
+
+        case CMD_MOVE_RIGHT:
+            data->selected_unit_index++;
+            if (data->selected_unit_index >= data->player_count) {
+                data->selected_unit_index = 0;
+            }
+            data->showing_movement = false;
+            break;
+
+        case CMD_COMBAT_TEST:
+            data->showing_movement = !data->showing_movement;
+
+            if (data->showing_movement && data->selected_unit_index >= 0) {
+                CombatUnit *selected = &data->player_units[data->selected_unit_index];
+                calculate_reachable_tiles(data, selected);
+            }
+            break;
+
+        default:
+            break;
+    }
     //TODO turn logic
 }
 
@@ -161,6 +274,7 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
     buffer_draw_char(fb, frame_x, frame_y + frame_height - 1, '+', COLOR_WHITE);
     buffer_draw_char(fb, frame_x + frame_width - 1, frame_y + frame_height - 1, '+', COLOR_WHITE);
     
+    //first pass
     for (int y = 0; y < data->grid_height; y++) {
         for (int x = 0; x < data->grid_width; x++) {
             CombatCell *cell = get_cell(data, x, y);
@@ -178,25 +292,47 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
                 ch = '#';
                 color = COLOR_WHITE;
             }
-            
+
+            if (data->showing_movement && data->reachable_tiles) {
+                int tile_index = y * data->grid_width + x;
+
+                if (data->reachable_tiles[tile_index]) {
+                    if (!cell->occupant) {
+                        ch = '*';
+                        color = COLOR_GREEN;
+                    }
+                }
+            }
+
             if (cell->occupant && cell->occupant->is_alive) {
                 ch = cell->occupant->display_char;
                 color = cell->occupant->color;
             }
-            
+
             buffer_draw_char(fb, screen_x, screen_y, ch, color);
         }
+    }  
+
+    if (data->selected_unit_index >= 0 &&
+        data->selected_unit_index < data->player_count && data->player_turn) {
+        CombatUnit *selected = &data->player_units[data->selected_unit_index];
+        int screen_x = grid_start_x + selected->grid_x;
+        int screen_y = grid_start_y + selected->grid_y;
+
+        buffer_draw_char(fb, screen_x - 1, screen_y, '[', COLOR_CYAN);
+        buffer_draw_char(fb, screen_x + 1, screen_y, ']', COLOR_CYAN);
+        buffer_draw_char(fb, screen_x, screen_y, selected->display_char, COLOR_CYAN);
     }
-    
+
     int ui_top_y = frame_y - 2;
     draw_text_centered(fb, ui_top_y, 
-                      data->player_turn ? "=== PLAYER TURN ===" : "=== ENEMY TURN ===", 
-                      COLOR_YELLOW);
+            data->player_turn ? "=== PLAYER TURN ===" : "=== ENEMY TURN ===", 
+            COLOR_YELLOW);
     
     int ui_bottom_y = frame_y + frame_height + 1;
     draw_text_centered(fb, ui_bottom_y,
-                      "| Arrow keys: select | Space: action | Q: exit |", 
-                      COLOR_BRIGHT_BLACK);
+                      "| Left/Right: select | C key: show moves | Q: exit |", 
+                      COLOR_CYAN);
     
     draw_text_centered(fb, ui_bottom_y + 1,
                       "-----------------------------------------------", 

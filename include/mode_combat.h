@@ -54,6 +54,9 @@ typedef struct CombatModeData {
 
     bool combat_over;
     bool player_won;
+
+    bool *reachable_tiles;
+    int reachable_count;
 } CombatModeData;
 
 

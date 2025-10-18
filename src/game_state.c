@@ -24,7 +24,6 @@ static void render_dissolve_transition(GameState *state, FrameBuffer *output) {
     for (int y = 0; y < state->term_height; y++) {
         for (int x = 0; x < state->term_width; x++) {
             //create unique "seed" mult by primes to ensure good distribution
-            //same position always generate same seed?
             int seed = x * 73 + y * 137;
             float pixel_threshold = (float)(seed % 1000) / 1000.0f;
             
