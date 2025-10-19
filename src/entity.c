@@ -7,6 +7,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define HORIZONTAL_SPEED 1.0f 
 #define VERTICAL_SPEED 1.0f
@@ -30,11 +31,101 @@ void animation_set(GameObject *entity,
 
 }
 
-void animation_update(GameObject *entity, float delta_time) {
+void prepare_morph_to_snake (GameObject *entity) {
+    float sorted_distances[100];
+    memcpy(sorted_distances,entity->shape.distances,
+            entity->demon_form_point_count * sizeof(float));
+    for (int i = 0;i < entity->snake_form_point_count;i ++) {
+        int min_dx = i;
+        for (int j = 0;j <entity->demon_form_point_count;j ++) {
+            if (sorted_distances[j] < sorted_distances[min_dx])  {
+                min_dx = j;
+            }
+        }
+        float temp = sorted_distances[i];
+        sorted_distances[i] = sorted_distances[min_dx];
+        sorted_distances[min_dx] = temp;
+    } 
+    float tresh = sorted_distances[entity->snake_form_point_count -1];
+    for (int i = 0;i < entity->demon_form_point_count;i ++) {
+        entity->point_collected[i] = (entity->shape.distances[i] <= tresh);
+    }
+}
 
-    //if (entity->animation_total_frames <= 1) {
-    //    return;
-    //}
+void morph_update (GameObject *entity, float delta_time) {
+    if (!entity->is_morphing) return;
+
+    entity->morph_progress += delta_time * 4.0f;
+
+    if (entity->morph_progress >= 2.0f) {
+        entity->morph_progress = 2.0f;
+        entity->is_morphing = false;
+
+        entity->in_snake_form = !entity->in_snake_form;
+
+        if (entity->in_snake_form) {
+            entity->shape.original_points = entity->snake_form_template;
+            entity->shape.point_count = entity->snake_form_point_count;
+        } else {
+            entity->shape.original_points = entity->demon_form_template;
+            entity->shape.point_count = entity->demon_form_point_count;
+        }
+
+        extern void apply_facing_to_shape(GameObject *entity);
+        apply_facing_to_shape(entity);
+        return;
+    }
+    //interpolate
+    bool morphing_to_snake = !entity->in_snake_form;
+    if (morphing_to_snake) {
+        int snake_idx = 0;
+        for (int i = 0;i < entity->demon_form_point_count
+             && snake_idx < entity->snake_form_point_count;i ++) {
+            if (entity->point_collected[i]) {
+                Point *demon_pt = &entity->demon_form_template[i];
+                Point *snake_pt = &entity->snake_form_template[snake_idx];
+
+                entity->shape.rotated_points[i].x = demon_pt->x +
+                    (snake_pt->x - demon_pt->x) * entity->morph_progress;
+                entity->shape.rotated_points[i].y = demon_pt->y +
+                    (snake_pt->y - demon_pt->y) * entity->morph_progress;
+                snake_idx++;
+            }
+        }
+    } else {
+        int snake_idx = 0;
+        for (int i = 0; i < entity->demon_form_point_count
+                && snake_idx < entity->snake_form_point_count; i++) {
+            if (entity->point_collected[i]) {
+                Point *snake_pt = &entity->snake_form_template[snake_idx];
+                Point *demon_pt = &entity->demon_form_template[i];
+
+                entity->shape.rotated_points[i].x = snake_pt->x + 
+                    (int)((demon_pt->x - snake_pt->x) * entity->morph_progress);
+                entity->shape.rotated_points[i].y = snake_pt->y + 
+                    (int)((demon_pt->y - snake_pt->y) * entity->morph_progress);
+                snake_idx++;
+            }
+        }
+        entity->shape.point_count = entity->demon_form_point_count;
+    }
+
+}
+
+void start_morph (GameObject *entity) {
+    if (entity->is_morphing) return;
+    entity->is_morphing = true;
+    entity->morph_progress = 0.0f;
+
+    if (!entity->in_snake_form) {
+        prepare_morph_to_snake(entity);
+    }
+}
+
+void animation_update(GameObject *entity, float delta_time) {
+    if (entity->is_morphing) {
+        return;
+    }
 
     entity->animation_timer += delta_time;
 
@@ -46,10 +137,19 @@ void animation_update(GameObject *entity, float delta_time) {
             entity->animation_current_frame = 0;
         }
 
-        entity->shape.original_points = 
-            entity->animation_frames[entity->animation_current_frame];
-        entity->shape.point_count = 
-            entity->animation_frame_counts[entity->animation_current_frame];
+        // Use snake form animations when in snake form
+        if (entity->in_snake_form) {
+            if (entity->animation_current_frame >= entity->snake_form_idle_total_frames) {
+                entity->animation_current_frame = 0;
+            }
+            entity->shape.original_points = entity->snake_form_idle_frames[entity->animation_current_frame];
+            entity->shape.point_count = entity->snake_form_idle_frame_counts[entity->animation_current_frame];
+        } else {
+            entity->shape.original_points = 
+                entity->animation_frames[entity->animation_current_frame];
+            entity->shape.point_count = 
+                entity->animation_frame_counts[entity->animation_current_frame];
+        }
 
         extern void apply_facing_to_shape(GameObject *entity);
         apply_facing_to_shape(entity);
@@ -66,6 +166,10 @@ void animation_switch_to(GameObject *entity, AnimationState new_state, float spe
     //entity->animation_current_frame = 0;
     entity->animation_speed = speed;
     
+    if (entity->in_snake_form) {
+        return;
+    }
+
     if (new_state == ANIM_STATE_IDLE) {
         entity->animation_frames = entity->anim_idle_frames;
         entity->animation_frame_counts = entity->anim_idle_frame_counts;

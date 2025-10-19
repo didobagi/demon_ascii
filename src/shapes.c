@@ -652,7 +652,7 @@ Point* bonobo_walk_frames[] = {
     bonobo_walk_frame2,
     bonobo_walk_frame3,
     bonobo_walk_frame2,
-    bonobo_walk_frame2,
+    bonobo_walk_frame1,
 };
 
 // Array of frame counts
@@ -667,3 +667,79 @@ int bonobo_walk_frame_counts[] = {
 
 const int bonobo_walk_total_frames = 6;
 
+// Animation: snake_form_idle (flipped to face right)
+// Frames: 4
+Point snake_form_idle_frame0[] = {
+    {4, -5}, {3, -5}, {1, -5},
+    {3, -4}, {2, -4}, {1, -4}, {0, -4},
+    {2, -3}, {1, -3}, {0, -3},
+    {1, -2}, {0, -2},
+    {2, -1}, {1, -1},
+    {3, 0}, {2, 0},
+    {3, 1}, {2, 1},
+    {3, 2}, {2, 2}, {-4, 2},
+    {2, 3}, {1, 3}, {0, 3}, {-1, 3}, {-2, 3}, {-3, 3},
+    {2, 4}, {1, 4}, {0, 4}, {-1, 4}, {-2, 4}
+};
+Point snake_form_idle_frame1[] = {
+    {5, -5}, {4, -5}, {3, -5}, {2, -5},
+    {4, -4}, {3, -4}, {1, -4},
+    {3, -3}, {2, -3}, {1, -3},
+    {2, -2}, {1, -2},
+    {2, -1},
+    {4, 0}, {3, 0},
+    {4, 1},
+    {3, 2}, {2, 2}, {-4, 2},
+    {2, 3}, {1, 3}, {0, 3}, {-1, 3}, {-2, 3}, {-3, 3},
+    {2, 4}, {1, 4}, {0, 4}, {-1, 4}, {-2, 4}
+};
+Point snake_form_idle_frame2[] = {
+    {5, -5}, {4, -5}, {3, -5}, {2, -5},
+    {4, -4}, {1, -4},
+    {4, -3}, {1, -3},
+    {4, -2}, {3, -2}, {2, -2}, {1, -2},
+    {2, -1},
+    {4, 0}, {3, 0},
+    {4, 1},
+    {3, 2}, {2, 2}, {-4, 2},
+    {2, 3}, {1, 3}, {0, 3}, {-1, 3}, {-2, 3}, {-3, 3},
+    {2, 4}, {1, 4}, {0, 4}, {-1, 4}, {-2, 4}
+};
+Point snake_form_idle_frame3[] = {
+    {5, -5}, {4, -5}, {3, -5}, {2, -5}, {1, -5},
+    {4, -4}, {1, -4}, {0, -4},
+    {4, -3}, {0, -3},
+    {4, -2}, {3, -2}, {2, -2}, {1, -2}, {0, -2},
+    {3, -1}, {2, -1},
+    {4, 0}, {3, 0},
+    {4, 1},
+    {3, 2}, {-4, 2},
+    {2, 3}, {1, 3}, {0, 3}, {-1, 3}, {-2, 3}, {-3, 3},
+    {2, 4}, {1, 4}, {0, 4}, {-1, 4}, {-2, 4}
+};
+const int snake_form_idle_frame0_count = sizeof(snake_form_idle_frame0)/sizeof(Point);
+const int snake_form_idle_frame1_count = sizeof(snake_form_idle_frame1)/sizeof(Point);
+const int snake_form_idle_frame2_count = sizeof(snake_form_idle_frame2)/sizeof(Point);
+const int snake_form_idle_frame3_count = sizeof(snake_form_idle_frame3)/sizeof(Point);
+
+// Array of frame pointers
+Point* snake_form_idle_frames[] = {
+    snake_form_idle_frame0,
+    snake_form_idle_frame1,
+    snake_form_idle_frame2,
+    snake_form_idle_frame3,
+    snake_form_idle_frame2,
+    snake_form_idle_frame1,
+};
+
+// Array of frame counts
+int snake_form_idle_frame_counts[] = {
+    snake_form_idle_frame0_count,
+    snake_form_idle_frame1_count,
+    snake_form_idle_frame2_count,
+    snake_form_idle_frame3_count,
+    snake_form_idle_frame2_count,
+    snake_form_idle_frame1_count,
+};
+
+const int snake_form_idle_total_frames = 4;

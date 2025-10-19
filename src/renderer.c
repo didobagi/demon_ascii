@@ -128,10 +128,12 @@ void render_entity (FrameBuffer *fb, Camera *camera, GameObject *entity, unsigne
         return;
     }
     for (int i = 0;i < entity->shape.point_count;i ++) {
+        if (entity->is_morphing && !entity->point_collected[i]) {
+            continue;
+        }
         if (entity->in_snake_form && !entity->point_collected[i]) {
             continue;
         }
-
         int point_world_x = (int)(entity->v_x + 0.5) + entity->shape.rotated_points[i].x;
         int point_world_y = (int)(entity->v_y + 0.5) + entity->shape.rotated_points[i].y;
 

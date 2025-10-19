@@ -8,7 +8,21 @@ extern const int combat_arena_background_count;
 extern Point combat_arena_background_2[];
 extern const int combat_arena_background_count_2;
 
+// Character breathe frames
+extern Point carachter_breathe_frame0[];
+extern const int carachter_breathe_frame0_count;
 
+extern Point* carachter_breathe_frames[];
+extern int carachter_breathe_frame_counts[];
+extern const int carachter_breathe_total_frames;
+
+// Snake form frames
+extern Point snake_form_idle_frame0[];
+extern const int snake_form_idle_frame0_count;
+
+extern Point* snake_form_idle_frames[];
+extern int snake_form_idle_frame_counts[];
+extern const int snake_form_idle_total_frames;
 
 extern Point carachter_test_template[];
 extern Point ghost_template[];
@@ -33,6 +47,10 @@ extern const int carachter_breathe_total_frames;
 extern Point* carachter_walk_frames[];
 extern int carachter_walk_frame_counts[];
 extern const int carachter_walk_total_frames;
+
+extern Point* snake_form_idle_frames[];
+extern int snake_form_idle_frames_counts[];
+extern const int snake_form_idle_total_frames;
 
 extern Point* monkey_walk_frames[];
 extern int monkey_walk_frame_counts[];

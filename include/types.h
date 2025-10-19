@@ -175,9 +175,14 @@ typedef struct GameObject {
     Point *demon_form_template;
     int demon_form_point_count;
     Point *snake_form_template;
+    Point **snake_form_idle_frames;
+    int *snake_form_idle_frame_counts;
+    int snake_form_idle_total_frames;
     int snake_form_point_count;
     bool is_morphing;
+    float morph_progress;
     bool in_snake_form;
+    int morph_core_indices[100];
     bool point_collected[100];
     int total_collected_count;
 

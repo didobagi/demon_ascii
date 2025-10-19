@@ -3,6 +3,7 @@
 #include "../include/map_builder.h"
 #include "../include/spawn.h"
 #include "../include/movement.h"
+#include "../include/movement.h"
 #include "../include/animation.h"
 #include "../include/enemy_ai.h"
 #include "../include/rotation.h"
@@ -109,7 +110,21 @@ DungeonModeData* dungeon_mode_create(GameState *game_state) {
     data->player.anim_walk_total_frames = carachter_breathe_total_frames;
     data->player.current_anim_state = ANIM_STATE_WALK;
     animation_switch_to(&data->player, ANIM_STATE_IDLE, 0.2f);
-    
+
+    data->player.demon_form_template = carachter_breathe_frame0;
+    data->player.demon_form_point_count = carachter_breathe_frame0_count;
+    data->player.snake_form_template = snake_form_idle_frame0;
+    data->player.snake_form_point_count = snake_form_idle_frame0_count;
+    data->player.snake_form_idle_frames = snake_form_idle_frames;
+    data->player.snake_form_idle_frame_counts = snake_form_idle_frame_counts;
+    data->player.snake_form_idle_total_frames = snake_form_idle_total_frames;
+
+    data->player.in_snake_form = false;
+    data->player.is_morphing = false;
+
+    for (int i = 0; i < 100; i++) {
+        data->player.point_collected[i] = true;
+    }
     // Initialize camera
     camera_init(&data->camera, game_state->term_width, game_state->term_height);
     
@@ -159,6 +174,11 @@ void dungeon_handle_player_command(DungeonModeData *data, PlayerCommand cmd) {
         case CMD_MOVE_DOWN:  dy = 1; break;
         case CMD_MOVE_LEFT:  dx = -1; break;
         case CMD_MOVE_RIGHT: dx = 1; break;
+        case CMD_MORPH:
+            if (!data->player.is_moving) {
+                start_morph(&data->player);
+            }
+            break;
         default: return;
     }
 
@@ -219,6 +239,7 @@ void dungeon_mode_update(DungeonModeData *data, PlayerCommand cmd, float delta_t
     
     // Update player
     animation_update(&data->player, delta_time);
+    morph_update (&data->player, delta_time);
     movement_update(&data->player, delta_time);
     
     //Update vis after player move
