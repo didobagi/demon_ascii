@@ -57,6 +57,9 @@ typedef struct CombatModeData {
 
     bool *reachable_tiles;
     int reachable_count;
+    
+    int cursor_x;
+    int cursor_y;
 } CombatModeData;
 
 

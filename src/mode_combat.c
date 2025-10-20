@@ -192,13 +192,72 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd) {
         return;
     }
 
+    if (data->showing_movement) {
+        switch (cmd) {
+            case CMD_MOVE_UP:
+                data->cursor_y--;
+                if (data->cursor_y < 0) data->cursor_y = 0;
+                break;
+                
+            case CMD_MOVE_DOWN:
+                data->cursor_y++;
+                if (data->cursor_y >= data->grid_height) {
+                    data->cursor_y = data->grid_height - 1;
+                }
+                break;
+                
+            case CMD_MOVE_LEFT:
+                data->cursor_x--;
+                if (data->cursor_x < 0) data->cursor_x = 0;
+                break;
+                
+            case CMD_MOVE_RIGHT:
+                data->cursor_x++;
+                if (data->cursor_x >= data->grid_width) {
+                    data->cursor_x = data->grid_width - 1;
+                }
+                break;
+                
+            case CMD_ACTION:
+                int cursor_index = data->cursor_y * data->grid_width + data->cursor_x;
+                
+                if (data->reachable_tiles && data->reachable_tiles[cursor_index]) {
+                    CombatUnit *unit = &data->player_units[data->selected_unit_index];
+                    
+                    CombatCell *old_cell = get_cell(data, unit->grid_x, unit->grid_y);
+                    if (old_cell) {
+                        old_cell->occupant = NULL;
+                    }
+                    
+                    unit->grid_x = data->cursor_x;
+                    unit->grid_y = data->cursor_y;
+                    unit->has_moved = true;
+                    
+                    CombatCell *new_cell = get_cell(data, unit->grid_x, unit->grid_y);
+                    if (new_cell) {
+                        new_cell->occupant = unit;
+                    }
+                    
+                    data->showing_movement = false;
+                }
+                break;
+                
+            case CMD_COMBAT_TEST:
+                data->showing_movement = false;
+                break;
+                
+            default:
+                break;
+        }
+        
+        return;     }
+    
     switch (cmd) {
         case CMD_MOVE_LEFT:
             data->selected_unit_index--;
             if (data->selected_unit_index < 0) {
                 data->selected_unit_index = data->player_count - 1;
             }
-            data->showing_movement = false;
             break;
 
         case CMD_MOVE_RIGHT:
@@ -206,22 +265,28 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd) {
             if (data->selected_unit_index >= data->player_count) {
                 data->selected_unit_index = 0;
             }
-            data->showing_movement = false;
             break;
 
         case CMD_COMBAT_TEST:
-            data->showing_movement = !data->showing_movement;
-
-            if (data->showing_movement && data->selected_unit_index >= 0) {
+            if (data->selected_unit_index >= 0 && data->selected_unit_index < data->player_count) {
                 CombatUnit *selected = &data->player_units[data->selected_unit_index];
+                
+                if (selected->has_moved) {
+                    break; // TODO: Show message "Unit already moved"
+                }
+                
                 calculate_reachable_tiles(data, selected);
+                
+                data->cursor_x = selected->grid_x;
+                data->cursor_y = selected->grid_y;
+                
+                data->showing_movement = true;
             }
             break;
 
         default:
             break;
     }
-    //TODO turn logic
 }
 
 void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
@@ -313,6 +378,18 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
         }
     }  
 
+    if (data->showing_movement) {
+        int screen_x = grid_start_x + data->cursor_x;
+        int screen_y = grid_start_y + data->cursor_y;
+
+        int cursor_index = data->cursor_y * data->grid_width + data->cursor_x;
+        bool valid = data->reachable_tiles && data->reachable_tiles[cursor_index];
+
+        Color cursor_color = valid ? COLOR_CYAN : COLOR_RED;
+        buffer_draw_char(fb, screen_x - 1, screen_y, '<', cursor_color);
+        buffer_draw_char(fb, screen_x + 1, screen_y, '>', cursor_color);
+    }
+
     if (data->selected_unit_index >= 0 &&
         data->selected_unit_index < data->player_count && data->player_turn) {
         CombatUnit *selected = &data->player_units[data->selected_unit_index];
@@ -328,12 +405,18 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
     draw_text_centered(fb, ui_top_y, 
             data->player_turn ? "=== PLAYER TURN ===" : "=== ENEMY TURN ===", 
             COLOR_YELLOW);
-    
+
     int ui_bottom_y = frame_y + frame_height + 1;
-    draw_text_centered(fb, ui_bottom_y,
-                      "| Left/Right: select | C key: show moves | Q: exit |", 
-                      COLOR_CYAN);
-    
+    if (data->showing_movement) {
+        draw_text_centered(fb, ui_bottom_y,
+                "| Arrows: move cursor | Space: confirm | C: cancel |", 
+                COLOR_CYAN);
+    } else {
+        draw_text_centered(fb, ui_bottom_y,
+                "| Left/Right: select unit | C: move | Q: exit |", 
+                COLOR_CYAN);
+    }
+
     draw_text_centered(fb, ui_bottom_y + 1,
                       "-----------------------------------------------", 
                       COLOR_BRIGHT_BLACK);

@@ -14,11 +14,14 @@ typedef struct DialogueModeData{
     GameObject *enemy;
     GameObject *player;
 
+    DialogueLibrary *library;
     DialogueFragment *current_fragment;
     DialogueFragment *fragment_pool;
     int fragment_pool_size;
 
     int selected_choice;
+    float typewriter_timer;
+    int chars_revealed;
 } DialogueModeData;
 
 DialogueModeData* dialogue_mode_create (GameState *game_state, GameObject *enemy, GameObject *player);

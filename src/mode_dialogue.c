@@ -5,10 +5,60 @@
 #include <string.h>
 #include <stdio.h>
 
-// Forward declarations for internal functions
+
 static DialogueFragment* generate_initial_fragment(DialogueModeData *data);
 static void handle_choice_selection(DialogueModeData *data, int choice_index);
 static uint32_t sample_current_conditions(GameObject *player, GameObject *enemy);
+
+static int wrap_text(const char *text, char lines[][300], int max_lines, int max_width) {
+    int line_count = 0;
+    int text_pos = 0;
+    int text_len = strlen(text);
+
+    while (text_pos < text_len && line_count < max_lines) {
+        while (text_pos < text_len && text[text_pos] == ' ') {
+            text_pos++;
+        }
+
+        if (text_pos >= text_len) break;
+
+        int line_len = 0;
+        int last_space_pos = 0;
+
+        while (text_pos + line_len < text_len && line_len < max_width) {
+            if (text[text_pos + line_len] == ' ') {
+                last_space_pos = line_len;
+            }
+            line_len++;
+        }
+
+        if (text_pos + line_len >= text_len) {
+        }
+        else if (text[text_pos + line_len] == ' ') {
+        }
+        else if (last_space_pos > 0) {
+            line_len = last_space_pos;
+        }
+        else {
+            while (text_pos + line_len < text_len && text[text_pos + line_len] != ' ') {
+                line_len++;
+            }
+        }
+
+        strncpy(lines[line_count], text + text_pos, line_len);
+        lines[line_count][line_len] = '\0';
+
+        while (line_len > 0 && lines[line_count][line_len - 1] == ' ') {
+            lines[line_count][line_len - 1] = '\0';
+            line_len--;
+        }
+
+        text_pos += line_len;
+        line_count++;
+    }
+
+    return line_count;
+}
 
 DialogueModeData* dialogue_mode_create(GameState *game_state, GameObject *enemy, GameObject *player) {
     DialogueModeData *data = malloc(sizeof(DialogueModeData));
@@ -24,41 +74,49 @@ DialogueModeData* dialogue_mode_create(GameState *game_state, GameObject *enemy,
     DialogueFragmentPool *pool = load_dialogue_pool_from_file(
         "dialogue_fragments/bonobo_dialogue.txt", 
         "bonobo"
-    );
-    
+        );
+
     if (pool && library) {
         add_pool_to_library(library, pool);
-        
-        // Get pool for this enemy type
+
         DialogueFragmentPool *enemy_pool = get_dialogue_pool_for_entity(library, enemy->entity_type);
         if (enemy_pool) {
             data->fragment_pool = enemy_pool->fragments;
             data->fragment_pool_size = enemy_pool->count;
         }
     }
-    
-    // TODO: Store library reference so we can clean it up
-    // For now it leaks, but we'll fix architecture later
+
+    data->library = library;    
     
     // Generate initial fragment based on current state
     data->current_fragment = generate_initial_fragment(data);
     data->selected_choice = 0;
+    data->typewriter_timer = 0.0f;
+    data->chars_revealed = 0;
     
     return data;
 }
 
 void dialogue_mode_destroy(DialogueModeData *data) {
     if (!data) return;
-    
-    // Don't free fragment_pool - it's owned by library
-    // TODO: Add library cleanup when we store library reference
-    
+
+    if (data->library) {
+        destroy_dialogue_library(data->library);
+    } 
     free(data);
 }
 
 void dialogue_mode_update(DialogueModeData *data, PlayerCommand cmd) {
     if (!data->current_fragment) return;
-    
+    int text_length = strlen(data->current_fragment->text);
+    if (data->chars_revealed < text_length) {
+        data->typewriter_timer += 0.016f; 
+        if (data->typewriter_timer >= 0.01f) { 
+            data->typewriter_timer = 0.0f;
+            data->chars_revealed++;
+        }
+        return; // Don't allow input until text fully revealed
+    }
     int choice_count = data->current_fragment->choice_count;
     if (choice_count == 0) return;
     
@@ -77,7 +135,7 @@ void dialogue_mode_update(DialogueModeData *data, PlayerCommand cmd) {
             }
             break;
             
-        case CMD_MORPH:  // Space bar confirms choice
+        case CMD_ACTION:  
             handle_choice_selection(data, data->selected_choice);
             break;
             
@@ -96,30 +154,65 @@ void dialogue_mode_render(DialogueModeData *data, FrameBuffer *fb) {
         return;
     }
     
+    int dialogue_width = (int)(data->game_state->term_width * 0.7f);  
+    if (dialogue_width > 90) dialogue_width = 90; 
+    if (dialogue_width < 50) dialogue_width = 50;
+
     int mid_y = data->game_state->term_height / 2;
-    int start_y = mid_y - 8;
+    int start_y = mid_y - 15;
     
     // Draw dialogue box border
     draw_text_centered(fb, start_y, "================================", COLOR_BRIGHT_BLACK);
     draw_text_centered(fb, start_y + 1, "   ENCOUNTER", COLOR_YELLOW);
     draw_text_centered(fb, start_y + 2, "================================", COLOR_BRIGHT_BLACK);
-    
-    // Draw dialogue text - simple version for now
-    draw_text_centered(fb, start_y + 4, data->current_fragment->text, COLOR_WHITE);
-    
-    // Draw choices
-    int choice_y = start_y + 7;
-    for (int i = 0; i < data->current_fragment->choice_count; i++) {
-        Color color = (i == data->selected_choice) ? COLOR_YELLOW : COLOR_BRIGHT_BLACK;
-        char choice_text[80];
-        snprintf(choice_text, sizeof(choice_text), "%s %s", 
-                (i == data->selected_choice) ? ">" : " ",
-                data->current_fragment->choices[i].text);
-        draw_text_centered(fb, choice_y + i, choice_text, color);
+
+    char wrapped_lines[3][300];
+    int line_count = wrap_text(data->current_fragment->text, wrapped_lines, 3, dialogue_width);
+
+    for (int i = 0; i < line_count; i++) {
+        // Apply typewriter effect
+        int chars_in_prev_lines = 0;
+        for (int j = 0; j < i; j++) {
+            chars_in_prev_lines += strlen(wrapped_lines[j]);
+        }
+
+        int chars_to_show = data->chars_revealed - chars_in_prev_lines;
+        if (chars_to_show < 0) chars_to_show = 0;
+        if (chars_to_show > (int)strlen(wrapped_lines[i])) {
+            chars_to_show = strlen(wrapped_lines[i]);
+        }
+
+        char visible_text[300];
+        strncpy(visible_text, wrapped_lines[i], chars_to_show);
+        visible_text[chars_to_show] = '\0';
+
+        draw_text_centered(fb, start_y + 4 + i, visible_text, COLOR_WHITE);
+    } 
+    // Draw choices only if text fully revealed
+    int text_length = strlen(data->current_fragment->text);
+    if (data->chars_revealed >= text_length) {
+        int choice_y = start_y + 7;
+        for (int i = 0; i < data->current_fragment->choice_count; i++) {
+            Color color = (i == data->selected_choice) ? COLOR_YELLOW : COLOR_BRIGHT_BLACK;
+
+            // Wrap each choice text
+            char wrapped_choice_lines[5][300];
+            char prefixed_text[300];
+            snprintf(prefixed_text, sizeof(prefixed_text), "%s %s",
+                    (i == data->selected_choice) ? ">" : " ",
+                    data->current_fragment->choices[i].text);
+
+            int choice_line_count = wrap_text(prefixed_text, wrapped_choice_lines, 5, dialogue_width);
+
+            for (int j = 0; j < choice_line_count; j++) {
+                draw_text_centered(fb, choice_y, wrapped_choice_lines[j], color);
+                choice_y++;
+            }
+        }
     }
-    
-    draw_text_centered(fb, start_y + 12, "================================", COLOR_BRIGHT_BLACK);
-    draw_text_centered(fb, start_y + 13, "Arrow keys to select, SPACE to confirm", COLOR_BRIGHT_BLACK);
+    draw_text_centered(fb, start_y + 15, "================================", COLOR_BRIGHT_BLACK);
+    draw_text_centered(fb, start_y + 15, "+++++place holder text++++++++++", COLOR_BRIGHT_BLACK);
+    draw_text_centered(fb, start_y + 16, "Arrow keys to select, SPACE to confirm", COLOR_BRIGHT_BLACK);
     
     present_frame(fb);
 }
@@ -193,6 +286,8 @@ static void handle_choice_selection(DialogueModeData *data, int choice_index) {
             if (data->fragment_pool[i].id == choice->next_fragment_id) {
                 data->current_fragment = &data->fragment_pool[i];
                 data->selected_choice = 0;  // Reset selection
+                data->chars_revealed = 0;
+                data->typewriter_timer = 0.0f;
                 return;
             }
         }

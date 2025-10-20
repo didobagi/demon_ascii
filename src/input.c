@@ -55,7 +55,8 @@ GameKey read_game_key(void) {
     if (c == 'a' || c == 'A') return KEY_LEFT;
     if (c == 'd' || c == 'D') return KEY_RIGHT;
     if (c == 'c' || c == 'C') return KEY_COMBAT_TEST;
-    if (c == ' ') return KEY_MORPH;
+    if (c == ' ') return KEY_ACTION;  
+    if (c == 'm' || c == 'M') return KEY_MORPH;  
     
     return KEY_NONE;
 }
@@ -76,12 +77,15 @@ PlayerCommand read_player_command(void) {
         case KEY_RIGHT:
             return CMD_MOVE_RIGHT;
             
+        case KEY_ACTION:
+            return CMD_ACTION;
+            
         case KEY_MORPH:
             return CMD_MORPH;
-
+            
         case KEY_COMBAT_TEST:
             return CMD_COMBAT_TEST;
-
+            
         case KEY_QUIT:
             return CMD_QUIT;
             

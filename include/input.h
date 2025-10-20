@@ -7,6 +7,7 @@ typedef enum {
     CMD_MOVE_DOWN,
     CMD_MOVE_LEFT,
     CMD_MOVE_RIGHT,
+    CMD_ACTION,
     CMD_MORPH,
     CMD_COMBAT_TEST,
     CMD_QUIT,
@@ -18,6 +19,7 @@ typedef enum {
     KEY_DOWN = 2,
     KEY_LEFT = 3,
     KEY_RIGHT = 4,
+    KEY_ACTION = ' ',
     KEY_MORPH = 5,
     KEY_COMBAT_TEST = 6,
     KEY_QUIT = 'q'

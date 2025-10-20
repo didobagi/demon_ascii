@@ -1,26 +1,27 @@
 ID: 0
-CONDITIONS: SNAKE_FORM
-TEXT: he who hears but does not hold learns nothing
-CHOICE: flame on earth remaining still | COMBAT | HARD
-CHOICE: saw things no one can repeat | FRAGMENT | 2
-CHOICE: his will is our peace | PEACEFUL | EASY
+CONDITIONS: NONE
+TEXT: Another fool stumbles through. Listen, worm: what good is knowledge to a deaf idiot who forgets every fucking thing?
+CHOICE: flame on earth remaining still—I guard what I know, beast | PEACEFUL | EASY
+CHOICE: I saw things no one can repeat—more than you ever will | FRAGMENT | 2
+CHOICE: he who hears but does not hold learns nothing—show some fucking respect! | COMBAT | HARD
 ---
 ID: 1
 CONDITIONS: DEMON_FORM
-TEXT: with the short vision of a span
-CHOICE: intellect sinks deep | FRAGMENT | 3
-CHOICE: all things have order | PEACEFUL | EASY
-CHOICE: dull with false imagining | PUZZLE | MEDIUM
+TEXT: Ha! That twisted shadow of yours reeks of shit and corruption. You see with the short vision of a span like the worthless maggot you are, don't you?
+CHOICE: my intellect sinks deep—deeper than your insults | FRAGMENT | 3
+CHOICE: all things have order among themselves—even wretched apes | PEACEFUL | EASY
+CHOICE: I'll show you dull with false imagining, you filthy fuck! | COMBAT | MEDIUM
 ---
 ID: 2
-CONDITIONS: NONE
-TEXT: The sea I sail has never been passed
-CHOICE: launch vessel upon deep sea | PUZZLE | EASY
-CHOICE: rivulet descending to lowland | COMBAT | MEDIUM
+CONDITIONS: FRAGMENT >= 1
+TEXT: Oh, aren't you special? The sea you sail has never been passed—probably because you'll drown like the pathetic wretch you are. What now, coward?
+CHOICE: launch my vessel upon the deep sea—I fear no monkey's curse | PUZZLE | EASY
+CHOICE: as rivulet descending to the lowland—I'll not rise to your bait | PEACEFUL | EASY
+CHOICE: I came with deductions to this point—shut your cock-sucking mouth! | COMBAT | MEDIUM
 ---
 ID: 3
 CONDITIONS: NONE
-TEXT: greatest gift God made in creating
-CHOICE: came with deductions to this point | COMBAT | HARD
-CHOICE: charity never shuts doors | PEACEFUL | EASY
----
+TEXT: Last question for your feeble shit-for-brains: what was God's greatest gift in creating? Or are you too stupid to know?
+CHOICE: the will conformed to His will is our peace, even for you | PEACEFUL | EASY
+CHOICE: charity that never shuts its doors—something you lack entirely | FRAGMENT | 3
+CHOICE: freedom to choose—and I choose to silence your ass permanently | COMBAT | HARD

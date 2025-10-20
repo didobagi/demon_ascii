@@ -25,7 +25,7 @@ typedef struct {
 } DialogueOutcome;
 
 typedef struct {
-    char text[46];
+    char text[256];
     bool is_endpoint;
     int next_fragment_id;
     DialogueOutcome outcome;
