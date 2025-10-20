@@ -33,7 +33,7 @@ static bool parse_choice(const char *line, DialogueChoice *choice) {
     if (!pipe1) return false;
     
     int text_len = pipe1 - choice_start;
-    if (text_len >= 64) text_len = 63;
+    if (text_len >= 256) text_len = 255;
     strncpy(choice->text, choice_start, text_len);
     choice->text[text_len] = '\0';
     

@@ -279,8 +279,14 @@ void draw_text (FrameBuffer *fb, int x, int y, const char *text, Color color) {
 void draw_text_centered(FrameBuffer *fb, int y, const char *text, Color color) {
     int len = 0;
     while (text[len] != '\0') len++;
-    
-    int x = (fb->width - len) / 2 + 1;  // +1 because buffer_draw_char uses 1-indexed
+
+    int x = (fb->width - len) / 2 + 1;
+
+    // If text is too long, just left-align it with small margin
+    if (len > fb->width - 4) {
+        x = 3;  // Small left margin
+    }
+
     draw_text(fb, x, y, text, color);
 }
 

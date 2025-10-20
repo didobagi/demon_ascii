@@ -1,27 +1,27 @@
 ID: 0
 CONDITIONS: NONE
 TEXT: Another fool stumbles through. Listen, worm: what good is knowledge to a deaf idiot who forgets every fucking thing?
-CHOICE: flame on earth remaining still—I guard what I know, beast | PEACEFUL | EASY
-CHOICE: I saw things no one can repeat—more than you ever will | FRAGMENT | 2
-CHOICE: he who hears but does not hold learns nothing—show some fucking respect! | COMBAT | HARD
+CHOICE: I keep what matters, beast | PEACEFUL | EASY
+CHOICE: I've seen beyond your understanding | FRAGMENT | 2
+CHOICE: You'll learn respect through blood and pain! | COMBAT | HARD
 ---
 ID: 1
 CONDITIONS: DEMON_FORM
 TEXT: Ha! That twisted shadow of yours reeks of shit and corruption. You see with the short vision of a span like the worthless maggot you are, don't you?
-CHOICE: my intellect sinks deep—deeper than your insults | FRAGMENT | 3
-CHOICE: all things have order among themselves—even wretched apes | PEACEFUL | EASY
-CHOICE: I'll show you dull with false imagining, you filthy fuck! | COMBAT | MEDIUM
+CHOICE: I see deeper than you know | FRAGMENT | 3
+CHOICE: All things have their order, even this | PEACEFUL | EASY
+CHOICE: Let the galaxy burn with you in it! | COMBAT | MEDIUM
 ---
 ID: 2
 CONDITIONS: FRAGMENT >= 1
 TEXT: Oh, aren't you special? The sea you sail has never been passed—probably because you'll drown like the pathetic wretch you are. What now, coward?
-CHOICE: launch my vessel upon the deep sea—I fear no monkey's curse | PUZZLE | EASY
-CHOICE: as rivulet descending to the lowland—I'll not rise to your bait | PEACEFUL | EASY
-CHOICE: I came with deductions to this point—shut your cock-sucking mouth! | COMBAT | MEDIUM
+CHOICE: I sail where none have gone before | PUZZLE | EASY
+CHOICE: The lowland path serves me fine | PEACEFUL | EASY
+CHOICE: Skulls for the skull throne—starting with yours! | COMBAT | MEDIUM
 ---
 ID: 3
 CONDITIONS: NONE
 TEXT: Last question for your feeble shit-for-brains: what was God's greatest gift in creating? Or are you too stupid to know?
-CHOICE: the will conformed to His will is our peace, even for you | PEACEFUL | EASY
-CHOICE: charity that never shuts its doors—something you lack entirely | FRAGMENT | 3
-CHOICE: freedom to choose—and I choose to silence your ass permanently | COMBAT | HARD
+CHOICE: His will is our peace | PEACEFUL | EASY
+CHOICE: Charity keeps doors open | FRAGMENT | 3
+CHOICE: Freedom to choose death—yours! | COMBAT | HARD

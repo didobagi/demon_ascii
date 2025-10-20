@@ -12,51 +12,36 @@ static uint32_t sample_current_conditions(GameObject *player, GameObject *enemy)
 
 static int wrap_text(const char *text, char lines[][300], int max_lines, int max_width) {
     int line_count = 0;
-    int text_pos = 0;
-    int text_len = strlen(text);
-
-    while (text_pos < text_len && line_count < max_lines) {
-        while (text_pos < text_len && text[text_pos] == ' ') {
-            text_pos++;
+    const char *p = text;
+    
+    while (*p && line_count < max_lines) {
+        // Skip leading spaces
+        while (*p == ' ') p++;
+        if (!*p) break;
+        
+        const char *line_start = p;
+        const char *last_space = NULL;
+        int len = 0;
+        
+        // Scan ahead
+        while (*p && len < max_width) {
+            if (*p == ' ') last_space = p;
+            p++;
+            len++;
         }
-
-        if (text_pos >= text_len) break;
-
-        int line_len = 0;
-        int last_space_pos = 0;
-
-        while (text_pos + line_len < text_len && line_len < max_width) {
-            if (text[text_pos + line_len] == ' ') {
-                last_space_pos = line_len;
-            }
-            line_len++;
+        
+        // Backtrack to last space if we have more text
+        if (*p && last_space) {
+            len = last_space - line_start;
+            p = last_space + 1;  // Skip the space
         }
-
-        if (text_pos + line_len >= text_len) {
-        }
-        else if (text[text_pos + line_len] == ' ') {
-        }
-        else if (last_space_pos > 0) {
-            line_len = last_space_pos;
-        }
-        else {
-            while (text_pos + line_len < text_len && text[text_pos + line_len] != ' ') {
-                line_len++;
-            }
-        }
-
-        strncpy(lines[line_count], text + text_pos, line_len);
-        lines[line_count][line_len] = '\0';
-
-        while (line_len > 0 && lines[line_count][line_len - 1] == ' ') {
-            lines[line_count][line_len - 1] = '\0';
-            line_len--;
-        }
-
-        text_pos += line_len;
+        
+        // Copy line
+        strncpy(lines[line_count], line_start, len);
+        lines[line_count][len] = '\0';
         line_count++;
     }
-
+    
     return line_count;
 }
 
