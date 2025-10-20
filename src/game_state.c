@@ -214,7 +214,7 @@ void game_state_update(GameState *state, PlayerCommand cmd, float delta_time) {
             dialogue_mode_update(state->dialogue_data, cmd);
             break;
         case GAME_MODE_TURN_BASED_COMBAT:
-            combat_mode_update(state->combat_data, cmd);
+            combat_mode_update(state->combat_data, cmd, delta_time);
             break;
         case GAME_MODE_SIDE_SCROLL:
             scroll_mode_update(state->scroll_data, cmd, delta_time);

@@ -15,6 +15,9 @@ typedef enum {
 typedef struct {
     int grid_x;
     int grid_y;
+    float v_x;
+    float v_y;
+    bool is_moving;
     int max_hp;
     int current_hp;
     int move_range;
@@ -65,7 +68,7 @@ typedef struct CombatModeData {
 
 CombatModeData* combat_mode_create(GameState *game_state);
 void combat_mode_destroy(CombatModeData *data);
-void combat_mode_update(CombatModeData *data, PlayerCommand cmd);
+void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_time);
 void combat_mode_render(CombatModeData *data, FrameBuffer *fb);
 
 #endif

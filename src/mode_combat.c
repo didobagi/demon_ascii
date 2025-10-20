@@ -1,9 +1,27 @@
 #include "../include/render.h"
 #include "../include/mode_combat.h"
+#include "../include/movement.h"
 #include "../include/shapes.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+static void update_unit_visual_position(CombatUnit *unit, float delta_time) {
+    if (unit->is_moving) {
+        float speed = 10.0f;
+        float dx = (float)unit->grid_x - unit->v_x;
+        float dy = (float)unit->grid_y - unit->v_y;
+        
+        if (dx * dx + dy * dy < 0.01f) {
+            unit->v_x = (float)unit->grid_x;
+            unit->v_y = (float)unit->grid_y;
+            unit->is_moving = false;
+        } else {
+            unit->v_x += dx * speed * delta_time;
+            unit->v_y += dy * speed * delta_time;
+        }
+    }
+}
 
 static CombatCell* get_cell (CombatModeData *data,int x, int y) {
     if (x < 0 || x >= data->grid_width || y < 0 || y >= data->grid_height) {
@@ -126,6 +144,9 @@ CombatModeData* combat_mode_create(GameState *game_state) {
         data->player_units[i] = (CombatUnit){
             .grid_x = 1,
             .grid_y = 1 + i * 3,
+            .v_x = 1.0f,
+            .v_y = (float)(1 + i * 3),
+            .is_moving = false,
             .max_hp = 10,
             .current_hp = 10,
             .move_range = 4,
@@ -148,6 +169,9 @@ CombatModeData* combat_mode_create(GameState *game_state) {
         data->enemy_units[i] = (CombatUnit){
             .grid_x = 12,
             .grid_y = 2 + i * 3,
+            .v_x = 12.0f,
+            .v_y = (float)(2 + i * 3),
+            .is_moving = false,
             .max_hp = 9,
             .current_hp = 9,
             .move_range = 3,
@@ -180,7 +204,7 @@ void combat_mode_destroy(CombatModeData *data) {
     free(data);
 }
 
-void combat_mode_update(CombatModeData *data, PlayerCommand cmd) {
+void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_time) {
     if (data->combat_over) {
         if (cmd != CMD_NONE) {
             game_state_transition_to(data->game_state, GAME_MODE_DUNGEON_EXPLORATION);
@@ -232,6 +256,8 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd) {
                     unit->grid_x = data->cursor_x;
                     unit->grid_y = data->cursor_y;
                     unit->has_moved = true;
+                    
+                    unit->is_moving = true;
                     
                     CombatCell *new_cell = get_cell(data, unit->grid_x, unit->grid_y);
                     if (new_cell) {
@@ -287,6 +313,16 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd) {
         default:
             break;
     }
+
+    float combat_speed = 0.3f;
+
+    for (int i = 0; i < data->player_count; i++) {
+        update_unit_visual_position(&data->player_units[i], delta_time * combat_speed);
+    }
+
+    for (int i = 0; i < data->enemy_count; i++) {
+        update_unit_visual_position(&data->enemy_units[i], delta_time * combat_speed);
+    }
 }
 
 void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
@@ -297,7 +333,6 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
     
     int frame_x = (data->game_state->term_width - frame_width) / 2;
     int frame_y = (data->game_state->term_height - frame_height) / 2 - 3;
-
 
     int grid_start_x = frame_x + 1;
     int grid_start_y = frame_y + 1;
@@ -313,14 +348,12 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
     for (int i = 0; i < combat_arena_background_count_2; i++) {
         int point_x = screen_center_x + combat_arena_background_2[i].x + art_offset_x;
         int point_y = screen_center_y + combat_arena_background_2[i].y + art_offset_y;
-
         buffer_draw_char(fb, point_x, point_y, '.', COLOR_BRIGHT_WHITE);
     }
 
     for (int i = 0; i < combat_arena_background_count; i++) {
         int point_x = screen_center_x + combat_arena_background[i].x + art_offset_x;
         int point_y = screen_center_y + combat_arena_background[i].y + art_offset_y;
-
         buffer_draw_char(fb, point_x, point_y, 'o', COLOR_MAGENTA);
     }
 
@@ -339,7 +372,6 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
     buffer_draw_char(fb, frame_x, frame_y + frame_height - 1, '+', COLOR_WHITE);
     buffer_draw_char(fb, frame_x + frame_width - 1, frame_y + frame_height - 1, '+', COLOR_WHITE);
     
-    //first pass
     for (int y = 0; y < data->grid_height; y++) {
         for (int x = 0; x < data->grid_width; x++) {
             CombatCell *cell = get_cell(data, x, y);
@@ -360,7 +392,6 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
 
             if (data->showing_movement && data->reachable_tiles) {
                 int tile_index = y * data->grid_width + x;
-
                 if (data->reachable_tiles[tile_index]) {
                     if (!cell->occupant) {
                         ch = '*';
@@ -369,14 +400,27 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
                 }
             }
 
-            if (cell->occupant && cell->occupant->is_alive) {
-                ch = cell->occupant->display_char;
-                color = cell->occupant->color;
-            }
-
             buffer_draw_char(fb, screen_x, screen_y, ch, color);
         }
-    }  
+    }
+
+    for (int i = 0; i < data->player_count; i++) {
+        CombatUnit *unit = &data->player_units[i];
+        if (unit->is_alive) {
+            int screen_x = grid_start_x + (int)unit->v_x;
+            int screen_y = grid_start_y + (int)unit->v_y;
+            buffer_draw_char(fb, screen_x, screen_y, unit->display_char, unit->color);
+        }
+    }
+
+    for (int i = 0; i < data->enemy_count; i++) {
+        CombatUnit *unit = &data->enemy_units[i];
+        if (unit->is_alive) {
+            int screen_x = grid_start_x + (int)unit->v_x;
+            int screen_y = grid_start_y + (int)unit->v_y;
+            buffer_draw_char(fb, screen_x, screen_y, unit->display_char, unit->color);
+        }
+    }
 
     if (data->showing_movement) {
         int screen_x = grid_start_x + data->cursor_x;
@@ -390,11 +434,10 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
         buffer_draw_char(fb, screen_x + 1, screen_y, '>', cursor_color);
     }
 
-    if (data->selected_unit_index >= 0 &&
-        data->selected_unit_index < data->player_count && data->player_turn) {
+    if (data->selected_unit_index >= 0 && data->selected_unit_index < data->player_count && data->player_turn) {
         CombatUnit *selected = &data->player_units[data->selected_unit_index];
-        int screen_x = grid_start_x + selected->grid_x;
-        int screen_y = grid_start_y + selected->grid_y;
+        int screen_x = grid_start_x + (int)selected->v_x;
+        int screen_y = grid_start_y + (int)selected->v_y;
 
         buffer_draw_char(fb, screen_x - 1, screen_y, '[', COLOR_CYAN);
         buffer_draw_char(fb, screen_x + 1, screen_y, ']', COLOR_CYAN);
