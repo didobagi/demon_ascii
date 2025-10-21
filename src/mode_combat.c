@@ -106,6 +106,42 @@ static void calculate_reachable_tiles (CombatModeData *data, CombatUnit *unit) {
     free(queue);
 }
 
+static bool can_shoot_target (CombatModeData *data, CombatUnit *shooter, CombatUnit *target) {
+    int dx = abs(shooter->grid_x - target->grid_x);
+    int dy = abs(shooter->grid_y - target->grid_y);
+    int distance = (dx > dy) ? dx : dy;
+
+    if (distance > shooter->weapon_range) {
+        return false;
+    }
+
+    return true;
+}
+
+static int calculate_hit_chance (CombatModeData *data, CombatUnit *shooter, CombatUnit *target) {
+    int base_chance = shooter->base_hit_chance;
+
+    int dx = abs(shooter->grid_x - target->grid_x);
+    int dy = abs(shooter->grid_y - target->grid_y);
+
+    int distance = (dx > dy) ? dx : dy;
+    int distance_penalty = (distance -3) * 5;
+    if (distance_penalty < 0) distance_penalty = 0;
+
+        CombatCell *target_cell = get_cell(data, target->grid_x, target->grid_y);
+    int cover_bonus = 0;
+    if (target_cell) {
+        if (target_cell->cover == COVER_HALF) cover_bonus = 15;
+        if (target_cell->cover == COVER_FULL) cover_bonus = 30;
+    }
+    
+    int final_chance = base_chance - distance_penalty - cover_bonus;
+    if (final_chance < 10) final_chance = 10;
+    if (final_chance > 95) final_chance = 95;
+    
+    return final_chance;
+}
+
 CombatModeData* combat_mode_create(GameState *game_state) {
     CombatModeData *data = malloc(sizeof(CombatModeData));
     if (!data) return NULL;
@@ -150,7 +186,7 @@ CombatModeData* combat_mode_create(GameState *game_state) {
             .max_hp = 10,
             .current_hp = 10,
             .move_range = 4,
-            .weapon_range = 5,
+            .weapon_range = 8,
             .base_hit_chance = 77,
             .is_player_unit = true,
             .has_moved = false,
@@ -211,11 +247,83 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_tim
         }
         return;
     }
-
+    
     if (!data->player_turn) {
         return;
     }
-
+    
+    if (data->showing_targets) {
+        switch (cmd) {
+            case CMD_MOVE_LEFT:
+            case CMD_MOVE_UP:
+                data->selected_target_index--;
+                if (data->selected_target_index < 0) {
+                    data->selected_target_index = data->enemy_count - 1;
+                }
+                while (data->selected_target_index >= 0 && 
+                       !data->enemy_units[data->selected_target_index].is_alive) {
+                    data->selected_target_index--;
+                    if (data->selected_target_index < 0) {
+                        data->selected_target_index = data->enemy_count - 1;
+                    }
+                }
+                break;
+                
+            case CMD_MOVE_RIGHT:
+            case CMD_MOVE_DOWN:
+                data->selected_target_index++;
+                if (data->selected_target_index >= data->enemy_count) {
+                    data->selected_target_index = 0;
+                }
+                while (data->selected_target_index < data->enemy_count && 
+                       !data->enemy_units[data->selected_target_index].is_alive) {
+                    data->selected_target_index++;
+                    if (data->selected_target_index >= data->enemy_count) {
+                        data->selected_target_index = 0;
+                    }
+                }
+                break;
+                
+            case CMD_ACTION:
+                if (data->selected_target_index >= 0 && 
+                    data->selected_target_index < data->enemy_count) {
+                    CombatUnit *shooter = &data->player_units[data->selected_unit_index];
+                    CombatUnit *target = &data->enemy_units[data->selected_target_index];
+                    
+                    if (can_shoot_target(data, shooter, target)) {
+                        int hit_chance = calculate_hit_chance(data, shooter, target);
+                        int roll = rand() % 100;
+                        
+                        if (roll < hit_chance) {
+                            target->current_hp -= 3;
+                            if (target->current_hp <= 0) {
+                                target->current_hp = 0;
+                                target->is_alive = false;
+                                
+                                CombatCell *target_cell = get_cell(data, target->grid_x, target->grid_y);
+                                if (target_cell) {
+                                    target_cell->occupant = NULL;
+                                }
+                            }
+                        }
+                        
+                        shooter->has_acted = true;
+                        data->showing_targets = false;
+                    }
+                }
+                break;
+                
+            case CMD_COMBAT_TEST:
+                data->showing_targets = false;
+                break;
+                
+            default:
+                break;
+        }
+        
+        return;
+    }
+    
     if (data->showing_movement) {
         switch (cmd) {
             case CMD_MOVE_UP:
@@ -256,7 +364,6 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_tim
                     unit->grid_x = data->cursor_x;
                     unit->grid_y = data->cursor_y;
                     unit->has_moved = true;
-                    
                     unit->is_moving = true;
                     
                     CombatCell *new_cell = get_cell(data, unit->grid_x, unit->grid_y);
@@ -265,6 +372,15 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_tim
                     }
                     
                     data->showing_movement = false;
+                    
+                    for (int i = 0; i < data->enemy_count; i++) {
+                        if (data->enemy_units[i].is_alive && 
+                            can_shoot_target(data, unit, &data->enemy_units[i])) {
+                            data->showing_targets = true;
+                            data->selected_target_index = i;
+                            break;
+                        }
+                    }
                 }
                 break;
                 
@@ -276,7 +392,8 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_tim
                 break;
         }
         
-        return;     }
+        return;
+    }
     
     switch (cmd) {
         case CMD_MOVE_LEFT:
@@ -285,20 +402,20 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_tim
                 data->selected_unit_index = data->player_count - 1;
             }
             break;
-
+            
         case CMD_MOVE_RIGHT:
             data->selected_unit_index++;
             if (data->selected_unit_index >= data->player_count) {
                 data->selected_unit_index = 0;
             }
             break;
-
+            
         case CMD_COMBAT_TEST:
             if (data->selected_unit_index >= 0 && data->selected_unit_index < data->player_count) {
                 CombatUnit *selected = &data->player_units[data->selected_unit_index];
                 
                 if (selected->has_moved) {
-                    break; // TODO: Show message "Unit already moved"
+                    break;
                 }
                 
                 calculate_reachable_tiles(data, selected);
@@ -309,17 +426,15 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_tim
                 data->showing_movement = true;
             }
             break;
-
+            
         default:
             break;
     }
-
+    
     float combat_speed = 0.3f;
-
     for (int i = 0; i < data->player_count; i++) {
         update_unit_visual_position(&data->player_units[i], delta_time * combat_speed);
     }
-
     for (int i = 0; i < data->enemy_count; i++) {
         update_unit_visual_position(&data->enemy_units[i], delta_time * combat_speed);
     }
@@ -422,6 +537,28 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
         }
     }
 
+    if (data->showing_targets && data->selected_target_index >= 0 && 
+            data->selected_target_index < data->enemy_count) {
+        CombatUnit *shooter = &data->player_units[data->selected_unit_index];
+        CombatUnit *target = &data->enemy_units[data->selected_target_index];
+
+        if (target->is_alive) {
+            int screen_x = grid_start_x + (int)target->v_x;
+            int screen_y = grid_start_y + (int)target->v_y;
+
+            buffer_draw_char(fb, screen_x - 1, screen_y, '{', COLOR_RED);
+            buffer_draw_char(fb, screen_x + 1, screen_y, '}', COLOR_RED);
+
+            int hit_chance = calculate_hit_chance(data, shooter, target);
+            char chance_text[32];
+            snprintf(chance_text, sizeof(chance_text), "%d%% hit", hit_chance);
+
+            int text_x = (data->game_state->term_width - strlen(chance_text)) / 2;
+            draw_text(fb, text_x, screen_y - 2, chance_text, COLOR_YELLOW);
+        }
+    }
+
+    //cursor drawing
     if (data->showing_movement) {
         int screen_x = grid_start_x + data->cursor_x;
         int screen_y = grid_start_y + data->cursor_y;
@@ -450,7 +587,11 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
             COLOR_YELLOW);
 
     int ui_bottom_y = frame_y + frame_height + 1;
-    if (data->showing_movement) {
+    if (data->showing_targets) {
+        draw_text_centered(fb, ui_bottom_y,
+                "| Arrows: select target | Space: shoot | C: cancel |", 
+                COLOR_RED);
+    } else if (data->showing_movement) {
         draw_text_centered(fb, ui_bottom_y,
                 "| Arrows: move cursor | Space: confirm | C: cancel |", 
                 COLOR_CYAN);
@@ -459,7 +600,6 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
                 "| Left/Right: select unit | C: move | Q: exit |", 
                 COLOR_CYAN);
     }
-
     draw_text_centered(fb, ui_bottom_y + 1,
                       "-----------------------------------------------", 
                       COLOR_BRIGHT_BLACK);

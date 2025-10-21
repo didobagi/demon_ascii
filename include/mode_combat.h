@@ -63,6 +63,8 @@ typedef struct CombatModeData {
     
     int cursor_x;
     int cursor_y;
+
+    int selected_target_index;
 } CombatModeData;
 
 
