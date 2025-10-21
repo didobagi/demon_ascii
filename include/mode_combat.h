@@ -55,6 +55,14 @@ typedef struct CombatModeData {
     bool showing_movement;
     bool showing_targets;
 
+    bool animating_shot;
+    float shot_animation_timer;
+    int shot_from_x;
+    int shot_from_y;
+    int shot_to_x;
+    int shot_to_y;
+    bool shot_hit;
+
     bool combat_over;
     bool player_won;
 

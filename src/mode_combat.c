@@ -1,6 +1,5 @@
 #include "../include/render.h"
 #include "../include/mode_combat.h"
-#include "../include/movement.h"
 #include "../include/shapes.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -116,6 +115,37 @@ static bool can_shoot_target (CombatModeData *data, CombatUnit *shooter, CombatU
     }
 
     return true;
+}
+
+static void bresenham_line (int x0, int y0, int x1, int y1, int *path_x, int *path_y, int *path_length) {
+    int dx = abs(x1- x0);
+    int dy = abs(y1- y0);
+
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx - dy;
+    int count = 0;
+
+    int x = x0;
+    int y = y0;
+
+    while (1) {
+        path_x[count] = x;
+        path_y[count] = y;
+        count++;
+        if (x == x1 && y == y1) break;
+
+        int e2 = 2 * err; //to avoid floating
+        if (e2 > -dy) {
+            err -= dy;
+            x += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y += sy;
+        }
+    }
+    *path_length = count;
 }
 
 static int calculate_hit_chance (CombatModeData *data, CombatUnit *shooter, CombatUnit *target) {
@@ -241,6 +271,13 @@ void combat_mode_destroy(CombatModeData *data) {
 }
 
 void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_time) {
+    if (data->animating_shot) {
+        data->shot_animation_timer -= delta_time;
+        if (data->shot_animation_timer <= -0.5f) {
+            data->animating_shot = false;
+        }
+        return;
+    }
     if (data->combat_over) {
         if (cmd != CMD_NONE) {
             game_state_transition_to(data->game_state, GAME_MODE_DUNGEON_EXPLORATION);
@@ -293,8 +330,18 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_tim
                     if (can_shoot_target(data, shooter, target)) {
                         int hit_chance = calculate_hit_chance(data, shooter, target);
                         int roll = rand() % 100;
+
+                        bool hit = (roll < hit_chance);
+
+                        data->animating_shot = true;
+                        data->shot_animation_timer = 0.3f;
+                        data->shot_from_x = shooter->grid_x;
+                        data->shot_from_y = shooter->grid_y;
+                        data->shot_to_x = target->grid_x;
+                        data->shot_to_y = target->grid_y;
+                        data->shot_hit = hit;
                         
-                        if (roll < hit_chance) {
+                        if (hit) {
                             target->current_hp -= 3;
                             if (target->current_hp <= 0) {
                                 target->current_hp = 0;
@@ -419,18 +466,41 @@ void combat_mode_update(CombatModeData *data, PlayerCommand cmd, float delta_tim
                 }
                 
                 calculate_reachable_tiles(data, selected);
-                
+
                 data->cursor_x = selected->grid_x;
                 data->cursor_y = selected->grid_y;
-                
+
                 data->showing_movement = true;
             }
             break;
-            
+
+        case CMD_MORPH:
+            bool all_units_done = true;
+            for (int i = 0; i < data->player_count; i++) {
+                if (!data->player_units[i].has_moved || !data->player_units[i].has_acted) {
+                    all_units_done = false;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < data->player_count; i++) {
+                data->player_units[i].has_moved = false;
+                data->player_units[i].has_acted = false;
+            }
+
+            data->player_turn = false;
+
+            for (int i = 0; i < data->enemy_count; i++) {
+                data->enemy_units[i].has_moved = false;
+                data->enemy_units[i].has_acted = false;
+            }
+
+            data->player_turn = true;
+            break;
         default:
             break;
     }
-    
+
     float combat_speed = 0.3f;
     for (int i = 0; i < data->player_count; i++) {
         update_unit_visual_position(&data->player_units[i], delta_time * combat_speed);
@@ -557,7 +627,43 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
             draw_text(fb, text_x, screen_y - 2, chance_text, COLOR_YELLOW);
         }
     }
+    //draw projectile
+    if (data->animating_shot) {
+        int path_x[50];
+        int path_y[50];
+        int path_length;
 
+        bresenham_line(data->shot_from_x, data->shot_from_y,
+                data->shot_to_x, data->shot_to_y,
+                path_x, path_y, &path_length);
+
+        float progress = 1.0f - (data->shot_animation_timer / 0.3f);
+
+        // Only draw projectile during the first 0.3 seconds
+        if (data->shot_animation_timer > 0.0f) {
+            int visible_len = (int)(progress * path_length);
+
+            for (int i = 0; i < visible_len && i < path_length - 1; i++) {
+                int screen_x = grid_start_x + path_x[i];
+                int screen_y = grid_start_y + path_y[i];
+                buffer_draw_char(fb, screen_x, screen_y, '*', COLOR_YELLOW);
+            }
+        }
+
+        // Show impact text once projectile reaches target (entire 0.8s)
+        if (progress > 0.9f || data->shot_animation_timer <= 0.0f) {
+            int impact_x = grid_start_x + data->shot_to_x;
+            int impact_y = grid_start_y + data->shot_to_y;
+
+            if (data->shot_hit) {
+                buffer_draw_char(fb, impact_x, impact_y - 1, 'H', COLOR_RED);
+                buffer_draw_char(fb, impact_x, impact_y + 1, 'I', COLOR_RED);
+                buffer_draw_char(fb, impact_x - 1, impact_y, 'T', COLOR_RED);
+            } else {
+                draw_text(fb, impact_x - 2, impact_y - 1, "MISS", COLOR_BRIGHT_BLACK);
+            }
+        }
+    }
     //cursor drawing
     if (data->showing_movement) {
         int screen_x = grid_start_x + data->cursor_x;
@@ -597,11 +703,11 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
                 COLOR_CYAN);
     } else {
         draw_text_centered(fb, ui_bottom_y,
-                "| Left/Right: select unit | C: move | Q: exit |", 
+                "| Left/Right: select | C: move | M: end turn | Q: exit |", 
                 COLOR_CYAN);
     }
     draw_text_centered(fb, ui_bottom_y + 1,
-                      "-----------------------------------------------", 
+            "-----------------------------------------------", 
                       COLOR_BRIGHT_BLACK);
 
     draw_text_centered(fb, ui_bottom_y - 1,
