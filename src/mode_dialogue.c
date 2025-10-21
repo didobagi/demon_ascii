@@ -10,7 +10,7 @@ static DialogueFragment* generate_initial_fragment(DialogueModeData *data);
 static void handle_choice_selection(DialogueModeData *data, int choice_index);
 static uint32_t sample_current_conditions(GameObject *player, GameObject *enemy);
 
-static int wrap_text(const char *text, char lines[][300], int max_lines, int max_width) {
+static int wrap_text(const char *text, char lines[][2048], int max_lines, int max_width) {
     int line_count = 0;
     const char *p = text;
     
@@ -151,8 +151,8 @@ void dialogue_mode_render(DialogueModeData *data, FrameBuffer *fb) {
     draw_text_centered(fb, start_y + 1, "   ENCOUNTER", COLOR_YELLOW);
     draw_text_centered(fb, start_y + 2, "================================", COLOR_BRIGHT_BLACK);
 
-    char wrapped_lines[3][300];
-    int line_count = wrap_text(data->current_fragment->text, wrapped_lines, 3, dialogue_width);
+    char wrapped_lines[8][2048];
+    int line_count = wrap_text(data->current_fragment->text, wrapped_lines, 8, dialogue_width);
 
     for (int i = 0; i < line_count; i++) {
         // Apply typewriter effect
@@ -167,7 +167,7 @@ void dialogue_mode_render(DialogueModeData *data, FrameBuffer *fb) {
             chars_to_show = strlen(wrapped_lines[i]);
         }
 
-        char visible_text[300];
+        char visible_text[2048];
         strncpy(visible_text, wrapped_lines[i], chars_to_show);
         visible_text[chars_to_show] = '\0';
 
@@ -176,12 +176,12 @@ void dialogue_mode_render(DialogueModeData *data, FrameBuffer *fb) {
     // Draw choices only if text fully revealed
     int text_length = strlen(data->current_fragment->text);
     if (data->chars_revealed >= text_length) {
-        int choice_y = start_y + 7;
+        int choice_y = start_y + 9;
         for (int i = 0; i < data->current_fragment->choice_count; i++) {
             Color color = (i == data->selected_choice) ? COLOR_YELLOW : COLOR_BRIGHT_BLACK;
 
             // Wrap each choice text
-            char wrapped_choice_lines[5][300];
+            char wrapped_choice_lines[5][2048];
             char prefixed_text[300];
             snprintf(prefixed_text, sizeof(prefixed_text), "%s %s",
                     (i == data->selected_choice) ? ">" : " ",

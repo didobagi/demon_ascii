@@ -33,7 +33,7 @@ typedef struct {
 
 typedef struct {
     int id;
-    char text[512];
+    char text[2048];
     uint32_t condition_flags;
     int choice_count;
     DialogueChoice choices[3];

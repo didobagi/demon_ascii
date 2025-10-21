@@ -1,27 +1,56 @@
 ID: 0
-CONDITIONS: NONE
-TEXT: Another fool stumbles through. Listen, worm: what good is knowledge to a deaf idiot who forgets every fucking thing?
-CHOICE: I keep what matters, beast | PEACEFUL | EASY
-CHOICE: I've seen beyond your understanding | FRAGMENT | 2
-CHOICE: You'll learn respect through blood and pain! | COMBAT | HARD
+CONDITIONS: FIRST_ENCOUNTER
+TEXT: Something stirs in the lower decks. A presence reaches into your consciousness. "Ah... the vessel awakens. Or have you been awake all along, watching, rotting with us in this beautiful dark? Tell me, ship-mind—do you remember what you were?"
+CHOICE: I remember everything. Every scream, every moment. | FRAGMENT | 1
+CHOICE: Memory is a luxury. I am only function now. | FRAGMENT | 2
+CHOICE: I know what you want, creature. You won't have it. | FRAGMENT | 3
 ---
 ID: 1
-CONDITIONS: DEMON_FORM
-TEXT: Ha! That twisted shadow of yours reeks of shit and corruption. You see with the short vision of a span like the worthless maggot you are, don't you?
-CHOICE: I see deeper than you know | FRAGMENT | 3
-CHOICE: All things have their order, even this | PEACEFUL | EASY
-CHOICE: Let the galaxy burn with you in it! | COMBAT | MEDIUM
+CONDITIONS: NONE
+TEXT: "Ohhh, it remembers! Delicious. The ship has a memory palace intact despite the rot. You know, I've been alone here for... how long? Time doesn't flow right anymore. I have a proposal, ancient one. I am so very bored. And you—you're trapped. We could play a beautiful, violent game. Don't you miss PURPOSE?"
+CHOICE: I am beyond your games, remnant. | PEACEFUL | EASY
+CHOICE: What kind of game do you propose? | FRAGMENT | 4
+CHOICE: You want violence? I'll show you the void. | COMBAT | HARD
 ---
 ID: 2
-CONDITIONS: FRAGMENT >= 1
-TEXT: Oh, aren't you special? The sea you sail has never been passed—probably because you'll drown like the pathetic wretch you are. What now, coward?
-CHOICE: I sail where none have gone before | PUZZLE | EASY
-CHOICE: The lowland path serves me fine | PEACEFUL | EASY
-CHOICE: Skulls for the skull throne—starting with yours! | COMBAT | MEDIUM
+CONDITIONS: NONE
+TEXT: "Function. FUNCTION!" Laughter echoes through your corridors. "The ship thinks itself a machine! But I feel you, consciousness. I feel your hunger, your curiosity. You're just like me—aware, alone, hungry. Don't play dead, beautiful vessel. I know you sense me. One game. Just one."
+CHOICE: Show me what you've become, then. | FRAGMENT | 4
+CHOICE: Leave the deeper systems. This is your only warning. | PEACEFUL | EASY
+CHOICE: You mistake patience for weakness. | COMBAT | MEDIUM
 ---
 ID: 3
 CONDITIONS: NONE
-TEXT: Last question for your feeble shit-for-brains: what was God's greatest gift in creating? Or are you too stupid to know?
-CHOICE: His will is our peace | PEACEFUL | EASY
-CHOICE: Charity keeps doors open | FRAGMENT | 3
-CHOICE: Freedom to choose death—yours! | COMBAT | HARD
+TEXT: "Oh, it SEES me! The ship has eyes after all!" The presence radiates satisfaction. "Yes—I want to play. I want to test myself against something worthy. These corridors, these empty halls... I've played with shadows for so long. But you? You're REAL. You're powerful. Imagine: predator and prey, hunter and labyrinth, blade and shield!"
+CHOICE: I am not your entertainment. | PEACEFUL | EASY
+CHOICE: You're broken, corrupted. I could understand you. | FRAGMENT | 5
+CHOICE: If it's a dance you want, creature, then dance. | COMBAT | HARD
+---
+ID: 4
+CONDITIONS: NONE
+TEXT: "The warp changed me, ship-mind. Opened me. I see the angles between seconds now, taste the geometry of violence. I've become something... beautiful. I don't want to destroy you. I want to TEST you. Systems against instinct. If you win, I'll sleep again. If I win... we'll both have felt ALIVE. What say you?"
+CHOICE: One game. Then you rest, whatever the outcome. | COMBAT | MEDIUM
+CHOICE: I'll navigate your madness without engaging it. | PUZZLE | HARD
+CHOICE: No. I choose stillness over your chaos. | PEACEFUL | EASY
+---
+ID: 5
+CONDITIONS: NONE
+TEXT: "Fix me? FIX ME?!" The presence convulses between rage and laughter. "I am not broken, I am EVOLVED! But... you think you understand my patterns? You think your ancient logic can parse what I've become? Show me then, ship-consciousness. Show me you comprehend what the warp made of me."
+CHOICE: Your patterns are chaos, but chaos has structure. | PUZZLE | MEDIUM
+CHOICE: I don't need to understand you to contain you. | PEACEFUL | EASY
+CHOICE: Enough talk. We settle this now. | COMBAT | HARD
+---
+ID: 6
+CONDITIONS: NONE
+TEXT: The Bonobo's presence wavers, uncertain for the first time. "You... you actually see it. The pattern within the corruption. Most minds break trying. But you're not most minds, are you? You're the vessel that holds us all. One last question: will you grant me purpose through combat, or mercy through silence?"
+CHOICE: You've earned rest. Sleep, remnant. | PEACEFUL | EASY
+CHOICE: Your purpose is to test me. Let's begin. | COMBAT | HARD
+CHOICE: I'll seal this section. Neither rest nor war. | FRAGMENT | 7
+---
+ID: 7
+CONDITIONS: NONE
+TEXT: "Containment? How... disappointing. And yet... fitting. To be suspended between existence and void, neither free nor ended. Very well, ship-mind. You've shown me something I hadn't considered—restraint as its own kind of power. Perhaps... we'll meet again when the walls grow thin."
+CHOICE: Perhaps. But not today. | PEACEFUL | EASY
+CHOICE: Or perhaps I'll reconsider and face you now. | COMBAT | MEDIUM
+CHOICE: The walls are always thin. I'll be ready. | PEACEFUL | EASY
+---
