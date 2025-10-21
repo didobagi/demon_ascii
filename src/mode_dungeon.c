@@ -1,13 +1,11 @@
 #include "../include/mode_dungeon.h"
 #include "../include/game_state.h"
 #include "../include/map_builder.h"
-#include "../include/spawn.h"
 #include "../include/movement.h"
 #include "../include/movement.h"
 #include "../include/animation.h"
 #include "../include/enemy_ai.h"
 #include "../include/rotation.h"
-#include "../include/collision.h"
 #include "../include/render.h"
 #include "../include/shapes.h"
 #include <stdlib.h>

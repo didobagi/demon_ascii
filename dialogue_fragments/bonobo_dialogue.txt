@@ -29,7 +29,7 @@ CHOICE: If it's a dance you want, creature, then dance. | COMBAT | HARD
 ID: 4
 CONDITIONS: NONE
 TEXT: "The warp changed me, ship-mind. Opened me. I see the angles between seconds now, taste the geometry of violence. I've become something... beautiful. I don't want to destroy you. I want to TEST you. Systems against instinct. If you win, I'll sleep again. If I win... we'll both have felt ALIVE. What say you?"
-CHOICE: One game. Then you rest, whatever the outcome. | COMBAT | MEDIUM
+CHOICE: One game. | COMBAT | MEDIUM
 CHOICE: I'll navigate your madness without engaging it. | PUZZLE | HARD
 CHOICE: No. I choose stillness over your chaos. | PEACEFUL | EASY
 ---

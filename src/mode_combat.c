@@ -656,9 +656,7 @@ void combat_mode_render(CombatModeData *data, FrameBuffer *fb) {
             int impact_y = grid_start_y + data->shot_to_y;
 
             if (data->shot_hit) {
-                buffer_draw_char(fb, impact_x, impact_y - 1, 'H', COLOR_RED);
-                buffer_draw_char(fb, impact_x, impact_y + 1, 'I', COLOR_RED);
-                buffer_draw_char(fb, impact_x - 1, impact_y, 'T', COLOR_RED);
+                draw_text(fb, impact_x - 1, impact_y - 2, "HIT", COLOR_BRIGHT_RED);
             } else {
                 draw_text(fb, impact_x - 2, impact_y - 1, "MISS", COLOR_BRIGHT_BLACK);
             }
