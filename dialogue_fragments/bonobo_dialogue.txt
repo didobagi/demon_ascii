@@ -1,8 +1,8 @@
 ID: 0
 CONDITIONS: FIRST_ENCOUNTER
-TEXT: Something stirs in the lower decks. A presence reaches into your consciousness. "Ah... the vessel awakens. Or have you been awake all along, watching, rotting with us in this beautiful dark? Tell me, ship-mind—do you remember what you were?"
-CHOICE: I remember everything. Every scream, every moment. | FRAGMENT | 1
-CHOICE: Memory is a luxury. I am only function now. | FRAGMENT | 2
+TEXT: Something is moving in the lower decks. A presence steps forward. "Ah... the vessel awakens. Or have you been awake all along, watching, rotting with us in this beautiful dark? Tell me, ship-mind—do you remember what you were?"
+CHOICE: You insane being, whats are you rambling?? | FRAGMENT | 1
+CHOICE: Memory is a luxury. | FRAGMENT | 2
 CHOICE: I know what you want, creature. You won't have it. | FRAGMENT | 3
 ---
 ID: 1
@@ -10,12 +10,12 @@ CONDITIONS: NONE
 TEXT: "Ohhh, it remembers! Delicious. The ship has a memory palace intact despite the rot. You know, I've been alone here for... how long? Time doesn't flow right anymore. I have a proposal, ancient one. I am so very bored. And you—you're trapped. We could play a beautiful, violent game. Don't you miss PURPOSE?"
 CHOICE: I am beyond your games, remnant. | PEACEFUL | EASY
 CHOICE: What kind of game do you propose? | FRAGMENT | 4
-CHOICE: You want violence? I'll show you the void. | COMBAT | HARD
+CHOICE: You want violence? I'll show you the void bonobo. | COMBAT | HARD
 ---
 ID: 2
 CONDITIONS: NONE
 TEXT: "Function. FUNCTION!" Laughter echoes through your corridors. "The ship thinks itself a machine! But I feel you, consciousness. I feel your hunger, your curiosity. You're just like me—aware, alone, hungry. Don't play dead, beautiful vessel. I know you sense me. One game. Just one."
-CHOICE: Show me what you've become, then. | FRAGMENT | 4
+CHOICE: Show me what you've become, then bonobo. | FRAGMENT | 4
 CHOICE: Leave the deeper systems. This is your only warning. | PEACEFUL | EASY
 CHOICE: You mistake patience for weakness. | COMBAT | MEDIUM
 ---
@@ -24,7 +24,7 @@ CONDITIONS: NONE
 TEXT: "Oh, it SEES me! The ship has eyes after all!" The presence radiates satisfaction. "Yes—I want to play. I want to test myself against something worthy. These corridors, these empty halls... I've played with shadows for so long. But you? You're REAL. You're powerful. Imagine: predator and prey, hunter and labyrinth, blade and shield!"
 CHOICE: I am not your entertainment. | PEACEFUL | EASY
 CHOICE: You're broken, corrupted. I could understand you. | FRAGMENT | 5
-CHOICE: If it's a dance you want, creature, then dance. | COMBAT | HARD
+CHOICE: Im ready to play bonobo. | COMBAT | HARD
 ---
 ID: 4
 CONDITIONS: NONE
@@ -36,9 +36,9 @@ CHOICE: No. I choose stillness over your chaos. | PEACEFUL | EASY
 ID: 5
 CONDITIONS: NONE
 TEXT: "Fix me? FIX ME?!" The presence convulses between rage and laughter. "I am not broken, I am EVOLVED! But... you think you understand my patterns? You think your ancient logic can parse what I've become? Show me then, ship-consciousness. Show me you comprehend what the warp made of me."
-CHOICE: Your patterns are chaos, but chaos has structure. | PUZZLE | MEDIUM
+CHOICE: Your patterns are chaos. | PUZZLE | MEDIUM
 CHOICE: I don't need to understand you to contain you. | PEACEFUL | EASY
-CHOICE: Enough talk. We settle this now. | COMBAT | HARD
+CHOICE: Enough talk. We settle this now bonobo. | COMBAT | HARD
 ---
 ID: 6
 CONDITIONS: NONE

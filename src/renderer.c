@@ -237,7 +237,7 @@ void render_terrain (FrameBuffer *fb, Camera *camera, World *world) {
             }
             
             //gradient for FOV
-            float fade_start = world->view_radius - 4.2f;
+            float fade_start = world->view_radius - 0.2f;
             float fade_end = world->view_radius;
             if (distance > fade_start) {
                 float fade = (distance - fade_start) / (fade_end - fade_start);
